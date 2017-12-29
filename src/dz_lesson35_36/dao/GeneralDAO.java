@@ -1,18 +1,42 @@
 package dz_lesson35_36.dao;
 
 import dz_lesson35_36.exception.BadRequestException;
-import dz_lesson35_36.model.Utils;
+import dz_lesson35_36.model.Hotel;
 
 import java.io.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.LinkedList;
 
-public class GeneralDAO {
-
+public class GeneralDAO <T> {
     private static final String PATH_HOTEL_DB = "C:\\Users\\Skorodielov\\Desktop\\HotelDB.txt";
     private static final String PATH_ROOM_DB = "C:\\Users\\Skorodielov\\Desktop\\RoomDB.txt";
     private static final String PATH_USER_DB = "C:\\Users\\Skorodielov\\Desktop\\UserDB.txt";
     private static final String PATH_ORDER_DB = "C:\\Users\\Skorodielov\\Desktop\\OrderDB.txt";
+
+    /*public LinkedList <T> receivingObjectFromFile(String path)throws Exception{
+        if(path == null)
+            throw new BadRequestException("This path " + path + " is not exists");
+
+        LinkedList<T> arrays = new LinkedList<>();
+
+        String result = "";
+        try (BufferedReader br = new BufferedReader(new FileReader(path))){
+            String line;
+
+            int countLine = 0;
+            while ((line = br.readLine()) != null){
+                countLine++;
+                checkLine(line, countLine, checkLength(path));
+                result += line.concat("\n");
+            }
+        }catch (FileNotFoundException e){
+            throw new FileNotFoundException("File does not exist");
+        } catch (IOException e) {
+            throw new IOException("Reading from file " + path + " failed");
+        }
+        return null;
+    }*/
 
     public static String readingFromFile(String path)throws Exception{
         if(path == null)
@@ -56,6 +80,21 @@ public class GeneralDAO {
             throw new IOException("Reading from file " + path + " failed");
         }
     }
+
+    /*public static <T> boolean checkObjectById(String path, T t)throws Exception{
+        if (path == null || t == null)
+            throw new BadRequestException("Invalid incoming data");
+
+        String[] words = readingFromFile(path).split(",");
+        int index = 0;
+        for (String word : words) {
+            if (word != null && t.equals(Long.parseLong(word))){
+                return true;
+            }
+            index++;
+        }
+        return false;
+    }*/
 
     public static void checkLine(String line, int count, int lengthArray)throws Exception{
         //проверить чтобы строка была не пустая

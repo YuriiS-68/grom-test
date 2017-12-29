@@ -15,10 +15,4 @@ public class HotelService {
         return hotelDAO.addHotel(hotel);
     }
 
-    public static void deleteHotel(Long idHotel)throws Exception{
-        if (idHotel == null)
-            throw new BadRequestException("This id " + idHotel + " is not exist");
-    }
-
-
 }

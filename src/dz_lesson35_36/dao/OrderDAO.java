@@ -10,10 +10,9 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.Random;
 
-public class OrderDAO {
+public class OrderDAO extends GeneralDAO{
 
     private static Utils utils = new Utils();
-    private static GeneralDAO generalDAO = new GeneralDAO();
     private static final DateFormat FORMAT = new SimpleDateFormat("dd.MM.yyyy");
 
     public static void bookRoom(long roomId, long userId, long hotelId)throws Exception{
@@ -23,13 +22,13 @@ public class OrderDAO {
         if (roomId == 0 || userId == 0 || hotelId == 0)
             throw new BadRequestException("Invalid incoming data");
 
-        if(checkIdInFiles(utils.getPathRoomDB(), roomId))
+        if(checkRoomIdInFiles(utils.getPathRoomDB(), roomId))
             throw new BadRequestException("Room with id " + roomId + " is not exist");
 
-        if (checkIdInFiles(utils.getPathUserDB(), userId))
+        if (checkIdUserInOrderDB(utils.getPathUserDB(), userId))
             throw new BadRequestException("User with id " + userId + " is not exist");
 
-        if (checkIdInFiles(utils.getPathHotelDB(), hotelId))
+        if (checkIdHotelInOrderDB(utils.getPathHotelDB(), hotelId))
             throw new BadRequestException("Hotel with id " + hotelId + " is not exist");
 
         Order order = new Order();
@@ -77,278 +76,138 @@ public class OrderDAO {
         if (roomId == 0 || userId == 0)
             throw new BadRequestException("Invalid incoming data");
 
-        if(checkIdInOrderDB(utils.getPathOrderDB(), roomId))
+        if(checkIdRoomInOrderDB(utils.getPathOrderDB(), roomId))
             throw new BadRequestException("Room with id " + roomId + " is not exist");
 
-        if (checkIdInOrderDB(utils.getPathOrderDB(), userId))
+        if (checkIdUserInOrderDB(utils.getPathOrderDB(), userId))
             throw new BadRequestException("User with id " + userId + " is not exist");
 
         StringBuffer res = new StringBuffer();
 
-        String[] lines = generalDAO.readingFromFile(utils.getPathOrderDB()).split("\n");
         int index = 0;
-        for (String str : lines) {
-            if (str != null) {
-                String[] fields = str.split(",");
-                String idUser = "";
-                String idRoom = "";
-                for (Character ch : fields[1].toCharArray()) {
-                    if (ch != null && Character.isDigit(ch)) {
-                        idUser += ch;
-                    }
-                }
-                for (Character ch : fields[6].toCharArray()) {
-                    if (ch != null && Character.isDigit(ch)) {
-                        idRoom += ch;
-                    }
-                }
-                if (idUser.equals(Long.toString(userId)) && idRoom.equals(Long.toString(roomId))){
-                    str = "";
-                }
-                else {
-                    res.append(str);
-                    res.append("\n");
-                }
+        for (Order el : gettingListObjectsFromFile(utils.getPathOrderDB())) {
+            if (el != null && el.getUser().getId() != userId && el.getRoom().getId() != roomId) {
+                res.append(el);
+                res.append("\n");
             }
             index++;
         }
 
-        generalDAO.writerInFailBD(utils.getPathOrderDB(), res);
+        writerInFailBD(utils.getPathOrderDB(), res);
     }
 
     private static User findUserById(Long id)throws Exception{
         if (id == null)
             throw new BadRequestException("This does  " + id + " not exist ");
 
-        LinkedList<User> users = new LinkedList<>();
+        User user = new User();
 
-        try (BufferedReader br = new BufferedReader(new FileReader(utils.getPathUserDB()))){
-            String line;
-            while ((line = br.readLine()) != null){
-                String[] fields = line.split(",");
-                int index = 0;
-                for (String el : fields){
-                    if (el != null){
-                        User user = new User();
-                        String idUser = "";
-                        for (Character ch : fields[0].toCharArray()) {
-                            if (ch != null && Character.isDigit(ch)) {
-                                idUser += ch;
-                            }
-                        }
-                        user.setId(Long.parseLong(idUser));
-                        if (user.getId() == id) {
-                            user.setUserName(fields[1]);
-                            user.setPassword(fields[2]);
-                            user.setCountry(fields[3]);
-                            user.setUserType(UserType.USER);
-                            users.add(user);
-                        }
-                    }
-                    index++;
-                }
+        for (Order el : gettingListObjectsFromFile(utils.getPathOrderDB())){
+            if (el != null && el.getUser().getId() == id){
+                user = el.getUser();
             }
-        } catch (FileNotFoundException e){
-            throw new FileNotFoundException("File does not exist");
-        } catch (IOException e) {
-            throw new IOException("Reading from file " + utils.getPathUserDB() + " failed");
         }
-        return users.getFirst();
+        return user;
     }
 
     private static Room findRoomById(Long id)throws Exception{
         if (id == null)
             throw new BadRequestException("This does  " + id + " not exist ");
 
-        LinkedList<Room> rooms = new LinkedList<>();
+        Room room = new Room();
 
-        try (BufferedReader br = new BufferedReader(new FileReader(utils.getPathRoomDB()))){
-            String line;
-            while ((line = br.readLine()) != null){
-                String[] fields = line.split(",");
-                int index = 0;
-                for (String el : fields){
-                    if (el != null){
-                        Room room = new Room();
-                        String idRoom = "";
-                        for (Character ch : fields[0].toCharArray()) {
-                            if (ch != null && Character.isDigit(ch)) {
-                                idRoom += ch;
-                            }
-                        }
-                        room.setId(Long.parseLong(idRoom));
-                        if (room.getId() == id) {
-                            room.setNumberOfGuests(Integer.parseInt(fields[1]));
-                            room.setPrice(Double.parseDouble(fields[2]));
-                            room.setBreakfastIncluded(Boolean.parseBoolean(fields[3]));
-                            room.setPetsAllowed(Boolean.parseBoolean(fields[4]));
-                            room.setDateAvailableFrom(FORMAT.parse(fields[5]));
-                            rooms.add(room);
-                        }
-                    }
-                    index++;
-                }
+        for (Order el : gettingListObjectsFromFile(utils.getPathOrderDB())){
+            if (el != null && el.getRoom().getId() == id){
+                room = el.getRoom();
             }
-        } catch (FileNotFoundException e){
-            throw new FileNotFoundException("File does not exist");
-        } catch (IOException e) {
-            throw new IOException("Reading from file " + utils.getPathRoomDB() + " failed");
         }
-        return rooms.getFirst();
+        return room;
     }
 
-    private static boolean checkIdInFiles(String path, Long id)throws Exception{
+    private static boolean checkRoomIdInFiles(String path, Long id)throws Exception{
         if (path == null || id == 0 )
             throw new BadRequestException("Invalid incoming data");
 
-        try (BufferedReader br = new BufferedReader(new FileReader(path))){
-            String line;
-            int countLine = 0;
-            while ((line = br.readLine()) != null){
-                countLine++;
-                generalDAO.checkLine(line, countLine, generalDAO.checkLength(path));
-                String[] result = line.split(",");
-                for (String el : result){
-                    if (el != null && !el.equals(id.toString())){
-                        return false;
-                    }
-                }
-            }
-        } catch (FileNotFoundException e){
-            throw new FileNotFoundException("File does not exist");
-        } catch (IOException e) {
-            throw new IOException("Reading from file " + path + " failed");
-        }
-        return true;
-    }
-
-    private static boolean checkIdInOrderDB(String path, Long id)throws Exception{
-        if (path == null || id == 0 )
-            throw new BadRequestException("Invalid incoming data");
-
-        try (BufferedReader br = new BufferedReader(new FileReader(path))){
-            String line;
-            int countLine = 0;
-            while ((line = br.readLine()) != null){
-                countLine++;
-                generalDAO.checkLine(line, countLine, generalDAO.checkLength(path));
-                String[] result = line.split(",");
-                int index = 0;
-                for (String el : result){
-                    if (el != null && el.equals(result[index])){
-                        String idWanted = "";
-                        for (Character ch : result[index].toCharArray()) {
-                            if (ch != null && Character.isDigit(ch)) {
-                                idWanted += ch;
-                            }
-                        }
-                        if (!idWanted.equals(id.toString())){
-                            return false;
-                        }
-                    }
-                    index++;
-                }
-            }
-        } catch (FileNotFoundException e){
-            throw new FileNotFoundException("File does not exist");
-        } catch (IOException e) {
-            throw new IOException("Reading from file " + path + " failed");
-        }
-        return true;
-    }
-
-    /*private static String readingFromFile(String path)throws Exception{
-        if(path == null)
-            throw new BadRequestException("This path " + path + " is not exists");
-
-        String result = "";
-        try (BufferedReader br = new BufferedReader(new FileReader(path))){
-            String line;
-
-            int countLine = 0;
-            while ((line = br.readLine()) != null){
-                countLine++;
-                checkLine(line, countLine, checkLength(path));
-                result += line.concat("\n");
-            }
-        }catch (FileNotFoundException e){
-            throw new FileNotFoundException("File does not exist");
-        } catch (IOException e) {
-            throw new IOException("Reading from file " + path + " failed");
-        }
-        return result;
-    }
-
-    private static void checkingReadFile(String path)throws Exception{
-        if(path == null)
-            throw new BadRequestException("This path " + path + " is not exists");
-
-        String result = "";
-        try (BufferedReader br = new BufferedReader(new FileReader(path))){
-            String line;
-
-            int countLine = 0;
-            while ((line = br.readLine()) != null){
-                countLine++;
-                checkLine(line, countLine, checkLength(path));
-                result += line.concat("\n");
-            }
-        }catch (FileNotFoundException e){
-            throw new FileNotFoundException("File does not exist");
-        } catch (IOException e) {
-            throw new IOException("Reading from file " + path + " failed");
-        }
-    }
-
-    private static void checkLine(String line, int count, int lengthArray)throws Exception{
-        //проверить чтобы строка была не пустая
-        //проверить чтобы начиналась с цифрового символа
-        //проверить чтобы длина массива была 5
-        if (line == null)
-            throw new BadRequestException("Invalid incoming data");
-
-        if (count != 0 && line.isEmpty())
-            throw new BadRequestException("The line " + count + " nothing contains");
-
-        String[] arrayLine = line.split(",");
-        if (!checkArrayLine(arrayLine))
-            throw new BadRequestException("In this line " + count + " an error in the column id");
-
-        if (arrayLine.length != lengthArray)
-            throw new BadRequestException("The line " + count + " contains " + arrayLine.length + " columns in the table.");
-    }
-
-    private static int checkLength(String path){
-        int arrayLength = 0;
-        switch (path) {
-            case PATH_HOTEL_DB:
-            case PATH_USER_DB:
-                arrayLength = 5;
-                break;
-            case PATH_ROOM_DB:
-                arrayLength = 11;
-                break;
-            case PATH_ORDER_DB:
-                arrayLength = 16;
-                break;
-        }
-        return arrayLength;
-    }
-
-    private static void writerInFailBD(String path, StringBuffer content)throws Exception{
-        try(BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(path))){
-            bufferedWriter.append(content);
-        }catch (IOException e){
-            throw new IOException("Can not write to file " + path);
-        }
-    }
-
-    private static boolean checkArrayLine(String[] arrayLine){
-        for (Character ch : arrayLine[0].toCharArray()){
-            if (ch != null && !Character.isDigit(ch)){
+        for (Order el : gettingListObjectsFromFile(path)){
+            if (el != null && el.getRoom().getId() != id){
                 return false;
             }
         }
         return true;
-    }*/
+    }
+
+    private static boolean checkIdRoomInOrderDB(String path, Long id)throws Exception{
+        if (path == null || id == 0 )
+            throw new BadRequestException("Invalid incoming data");
+
+        for (Order el : gettingListObjectsFromFile(path)){
+            if (el != null && el.getRoom().getId() != id){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static boolean checkIdHotelInOrderDB(String path, Long id)throws Exception{
+        if (path == null || id == 0 )
+            throw new BadRequestException("Invalid incoming data");
+
+        Room room = new Room();
+        for (Order el : gettingListObjectsFromFile(path)){
+            if (el != null && el.getRoom().getId() != id){
+                room = el.getRoom();
+                if (room.getHotel().getId() != id){
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private static boolean checkIdUserInOrderDB(String path, Long id)throws Exception{
+        if (path == null || id == 0 )
+            throw new BadRequestException("Invalid incoming data");
+
+        for (Order el : gettingListObjectsFromFile(path)){
+            if (el != null && el.getUser().getId() != id){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static LinkedList<Order> gettingListObjectsFromFile(String path)throws Exception{
+        if(path == null)
+            throw new BadRequestException("This path " + path + " is not exists");
+
+        LinkedList<Order> arrays = new LinkedList<>();
+
+        try (BufferedReader br = new BufferedReader(new FileReader(path))){
+            String line;
+
+            while ((line = br.readLine()) != null){
+                String[] result = line.split("\n");
+                int index = 0;
+                for (String el : result){
+                    if (el != null){
+                        String[] fields = el.split(",");
+                        Order order = new Order();
+                        order.setId(Long.parseLong(fields[0]));
+                        order.setUser(findUserById(Long.parseLong(fields[1])));
+                        order.setRoom(findRoomById(Long.parseLong(fields[2])));
+                        order.setDateFrom(FORMAT.parse(fields[3]));
+                        order.setDateTo(FORMAT.parse(fields[4]));
+                        order.setMoneyPaid(Long.parseLong(fields[5]));
+                        arrays.add(order);
+                    }
+                    index++;
+                }
+            }
+        }catch (FileNotFoundException e){
+            throw new FileNotFoundException("File does not exist");
+        } catch (IOException e) {
+            throw new IOException("Reading from file " + path + " failed");
+        }
+        return arrays;
+    }
 }

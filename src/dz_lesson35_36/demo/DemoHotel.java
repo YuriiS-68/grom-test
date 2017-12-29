@@ -16,8 +16,8 @@ public class DemoHotel {
         //HotelDAO.addHotel(hotel2);
         //HotelDAO.addHotel(hotel3);
         //HotelDAO.addHotel(hotel4);
-        //HotelDAO.deleteHotel(hotel2);
+        HotelDAO.deleteHotel(333333L);
         //System.out.println(HotelDAO.findHotelByName("Meteor"));
-        System.out.println(HotelDAO.findHotelByCity("Kiev"));
+        //System.out.println(HotelDAO.findHotelByCity("Kiev"));
     }
 }
