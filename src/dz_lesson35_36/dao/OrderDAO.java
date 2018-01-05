@@ -6,9 +6,7 @@ import dz_lesson35_36.model.*;
 import java.io.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.Random;
+import java.util.*;
 
 public class OrderDAO extends GeneralDAO{
 
@@ -22,13 +20,13 @@ public class OrderDAO extends GeneralDAO{
         if (roomId == 0 || userId == 0 || hotelId == 0)
             throw new BadRequestException("Invalid incoming data");
 
-        if(checkRoomIdInFiles(utils.getPathRoomDB(), roomId))
+        if(!checkIdRoomInRoomDB(utils.getPathRoomDB(), roomId))
             throw new BadRequestException("Room with id " + roomId + " is not exist");
 
-        if (checkIdUserInOrderDB(utils.getPathUserDB(), userId))
+        if (!checkIdUserInUserDB(utils.getPathUserDB(), userId))
             throw new BadRequestException("User with id " + userId + " is not exist");
 
-        if (checkIdHotelInOrderDB(utils.getPathHotelDB(), hotelId))
+        if (!checkIdHotelInHotelDB(utils.getPathHotelDB(), hotelId))
             throw new BadRequestException("Hotel with id " + hotelId + " is not exist");
 
         Order order = new Order();
@@ -60,13 +58,12 @@ public class OrderDAO extends GeneralDAO{
         order.setMoneyPaid(orderCost);
 
         try(BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(utils.getPathOrderDB(), true))){
-            bufferedWriter.append(Long.toString(order.getId())).append(",");
-            bufferedWriter.append(order.getUser().toString()).append(",");
-            bufferedWriter.append(order.getRoom().toString()).append(",");
-            bufferedWriter.append(dateFrom).append(",");
-            bufferedWriter.append(dateTo).append(",");
-            bufferedWriter.append(Double.toString(orderCost));
-            bufferedWriter.append("\n");
+            bufferedWriter.append(Long.toString(order.getId()) + (","));
+            bufferedWriter.append(order.getUser().toString() + (","));
+            bufferedWriter.append(order.getRoom().toString() + (","));
+            bufferedWriter.append(dateFrom + (","));
+            bufferedWriter.append(dateTo + (","));
+            bufferedWriter.append(Double.toString(orderCost) + ("\n"));
         }catch (IOException e){
             throw new IOException("Can not write to file " + utils.getPathOrderDB());
         }
@@ -76,19 +73,27 @@ public class OrderDAO extends GeneralDAO{
         if (roomId == 0 || userId == 0)
             throw new BadRequestException("Invalid incoming data");
 
-        if(checkIdRoomInOrderDB(utils.getPathOrderDB(), roomId))
+        if(!checkIdRoomInOrderDB(utils.getPathOrderDB(), roomId))
             throw new BadRequestException("Room with id " + roomId + " is not exist");
 
-        if (checkIdUserInOrderDB(utils.getPathOrderDB(), userId))
+        if (!checkIdUserInOrderDB(utils.getPathOrderDB(), userId))
             throw new BadRequestException("User with id " + userId + " is not exist");
 
         StringBuffer res = new StringBuffer();
 
         int index = 0;
-        for (Order el : gettingListObjectsFromFile(utils.getPathOrderDB())) {
-            if (el != null && el.getUser().getId() != userId && el.getRoom().getId() != roomId) {
-                res.append(el);
-                res.append("\n");
+        for (Order el : gettingListObjectsFromFileOrderDB(utils.getPathOrderDB())) {
+            if (el != null && el.getUser().getId() == userId && el.getRoom().getId() == roomId) {
+                el = null;
+            }else {
+                if (el != null){
+                    res.append(Long.toString(el.getId()) + (","));
+                    res.append(el.getUser().toString() + (","));
+                    res.append(el.getRoom().toString() + (","));
+                    res.append(FORMAT.format(el.getDateFrom()) + (","));
+                    res.append(FORMAT.format(el.getDateTo()) + (","));
+                    res.append(Double.toString(el.getMoneyPaid()) + ("\n"));
+                }
             }
             index++;
         }
@@ -100,83 +105,51 @@ public class OrderDAO extends GeneralDAO{
         if (id == null)
             throw new BadRequestException("This does  " + id + " not exist ");
 
-        User user = new User();
-
-        for (Order el : gettingListObjectsFromFile(utils.getPathOrderDB())){
-            if (el != null && el.getUser().getId() == id){
-                user = el.getUser();
+        for (User user : gettingListObjectsFromFileUserDB(utils.getPathUserDB())) {
+            if (user != null && user.getId() == id){
+                return user;
             }
         }
-        return user;
+        throw new BadRequestException("User with " + id + " no such found.");
     }
 
     private static Room findRoomById(Long id)throws Exception{
         if (id == null)
             throw new BadRequestException("This does  " + id + " not exist ");
 
-        Room room = new Room();
-
-        for (Order el : gettingListObjectsFromFile(utils.getPathOrderDB())){
-            if (el != null && el.getRoom().getId() == id){
-                room = el.getRoom();
+        for (Room room : gettingListObjectsFromFileRoomDB(utils.getPathRoomDB())) {
+            if (room != null && room.getId() == id){
+                return room;
             }
         }
-        return room;
-    }
-
-    private static boolean checkRoomIdInFiles(String path, Long id)throws Exception{
-        if (path == null || id == 0 )
-            throw new BadRequestException("Invalid incoming data");
-
-        for (Order el : gettingListObjectsFromFile(path)){
-            if (el != null && el.getRoom().getId() != id){
-                return false;
-            }
-        }
-        return true;
+        throw new BadRequestException("Room with " + id + " no such found.");
     }
 
     private static boolean checkIdRoomInOrderDB(String path, Long id)throws Exception{
         if (path == null || id == 0 )
             throw new BadRequestException("Invalid incoming data");
 
-        for (Order el : gettingListObjectsFromFile(path)){
-            if (el != null && el.getRoom().getId() != id){
-                return false;
+        for (Order el : gettingListObjectsFromFileOrderDB(path)){
+            if (el != null && el.getRoom().getId() == id){
+                return true;
             }
         }
-        return true;
-    }
-
-    private static boolean checkIdHotelInOrderDB(String path, Long id)throws Exception{
-        if (path == null || id == 0 )
-            throw new BadRequestException("Invalid incoming data");
-
-        Room room = new Room();
-        for (Order el : gettingListObjectsFromFile(path)){
-            if (el != null && el.getRoom().getId() != id){
-                room = el.getRoom();
-                if (room.getHotel().getId() != id){
-                    return false;
-                }
-            }
-        }
-        return true;
+        return false;
     }
 
     private static boolean checkIdUserInOrderDB(String path, Long id)throws Exception{
         if (path == null || id == 0 )
             throw new BadRequestException("Invalid incoming data");
 
-        for (Order el : gettingListObjectsFromFile(path)){
-            if (el != null && el.getUser().getId() != id){
-                return false;
+        for (Order el : gettingListObjectsFromFileOrderDB(path)){
+            if (el != null && el.getUser().getId() == id){
+                return true;
             }
         }
-        return true;
+        return false;
     }
 
-    private static LinkedList<Order> gettingListObjectsFromFile(String path)throws Exception{
+    private static LinkedList<Order> gettingListObjectsFromFileOrderDB(String path)throws Exception{
         if(path == null)
             throw new BadRequestException("This path " + path + " is not exists");
 
@@ -187,20 +160,30 @@ public class OrderDAO extends GeneralDAO{
 
             while ((line = br.readLine()) != null){
                 String[] result = line.split("\n");
-                int index = 0;
                 for (String el : result){
                     if (el != null){
                         String[] fields = el.split(",");
                         Order order = new Order();
                         order.setId(Long.parseLong(fields[0]));
-                        order.setUser(findUserById(Long.parseLong(fields[1])));
-                        order.setRoom(findRoomById(Long.parseLong(fields[2])));
-                        order.setDateFrom(FORMAT.parse(fields[3]));
-                        order.setDateTo(FORMAT.parse(fields[4]));
-                        order.setMoneyPaid(Long.parseLong(fields[5]));
+                        String idUser = "";
+                        for (Character ch : fields[1].toCharArray()) {
+                            if (ch != null && Character.isDigit(ch)) {
+                                idUser += ch;
+                            }
+                        }
+                        order.setUser(findUserById(Long.parseLong(idUser)));
+                        String idRoom = "";
+                        for (Character ch : fields[6].toCharArray()) {
+                            if (ch != null && Character.isDigit(ch)) {
+                                idRoom += ch;
+                            }
+                        }
+                        order.setRoom(findRoomById(Long.parseLong(idRoom)));
+                        order.setDateFrom(FORMAT.parse(fields[17]));
+                        order.setDateTo(FORMAT.parse(fields[18]));
+                        order.setMoneyPaid(Double.parseDouble(fields[19]));
                         arrays.add(order);
                     }
-                    index++;
                 }
             }
         }catch (FileNotFoundException e){
@@ -210,4 +193,169 @@ public class OrderDAO extends GeneralDAO{
         }
         return arrays;
     }
+
+    private static LinkedList<Room> gettingListObjectsFromFileRoomDB(String path)throws Exception{
+        if(path == null)
+            throw new BadRequestException("This path " + path + " is not exists");
+
+        LinkedList<Room> arrays = new LinkedList<>();
+
+        try (BufferedReader br = new BufferedReader(new FileReader(path))){
+            String line;
+
+            while ((line = br.readLine()) != null){
+                String[] result = line.split("\n");
+                for (String el : result){
+                    if (el != null){
+                        String[] fields = el.split(",");
+                        Room room = new Room();
+                        room.setId(Long.parseLong(fields[0]));
+                        room.setNumberOfGuests(Integer.parseInt(fields[1]));
+                        room.setPrice(Double.parseDouble(fields[2]));
+                        room.setBreakfastIncluded(Boolean.parseBoolean(fields[3]));
+                        room.setPetsAllowed(Boolean.parseBoolean(fields[4]));
+                        room.setDateAvailableFrom(FORMAT.parse(fields[5]));
+                        String idHotel = "";
+                        for (Character ch : fields[6].toCharArray()) {
+                            if (ch != null && Character.isDigit(ch)) {
+                                idHotel += ch;
+                            }
+                        }
+                        room.setHotel(findHotelById(Long.parseLong(idHotel)));
+                        arrays.add(room);
+                    }
+                }
+            }
+        }catch (FileNotFoundException e){
+            throw new FileNotFoundException("File does not exist");
+        } catch (IOException e) {
+            throw new IOException("Reading from file " + path + " failed");
+        }
+        return arrays;
+    }
+
+    private static LinkedList<Hotel> gettingListObjectsFromFileHotelDB(String path)throws Exception{
+        if(path == null)
+            throw new BadRequestException("This path " + path + " is not exists");
+
+        LinkedList<Hotel> arrays = new LinkedList<>();
+
+        try (BufferedReader br = new BufferedReader(new FileReader(path))){
+            String line;
+
+            while ((line = br.readLine()) != null){
+                String[] result = line.split("\n");
+                for (String el : result){
+                    if (el != null){
+                        String[] fields = el.split(",");
+                        Hotel hotel = new Hotel();
+                        hotel.setId(Long.parseLong(fields[0]));
+                        hotel.setCountry(fields[1]);
+                        hotel.setCity(fields[2]);
+                        hotel.setStreet(fields[3]);
+                        hotel.setName(fields[4]);
+                        arrays.add(hotel);
+                    }
+                }
+            }
+        }catch (FileNotFoundException e){
+            throw new FileNotFoundException("File does not exist");
+        } catch (IOException e) {
+            throw new IOException("Reading from file " + path + " failed");
+        }
+        return arrays;
+    }
+
+    private static Hotel findHotelById(Long id)throws Exception{
+        if (id == null)
+            throw new BadRequestException("This does  " + id + " not exist ");
+
+        for (Hotel hotel : gettingListObjectsFromFileHotelDB(utils.getPathHotelDB())) {
+            if (hotel != null && hotel.getId() == id){
+                return hotel;
+            }
+        }
+        throw new BadRequestException("Hotel with " + id + " no such found.");
+    }
+
+    private static LinkedList<User> gettingListObjectsFromFileUserDB(String path)throws Exception{
+        if(path == null)
+            throw new BadRequestException("This path " + path + " is not exists");
+
+        LinkedList<User> arrays = new LinkedList<>();
+
+        try (BufferedReader br = new BufferedReader(new FileReader(path))){
+            String line;
+
+            while ((line = br.readLine()) != null){
+                String[] result = line.split("\n");
+                for (String el : result){
+                    if (el != null){
+                        String[] fields = el.split(",");
+                        User user = new User();
+                        user.setId(Long.parseLong(fields[0]));
+                        user.setUserName(fields[1]);
+                        user.setPassword(fields[2]);
+                        user.setCountry(fields[3]);
+                        if (fields[4].equals("USER")){
+                            user.setUserType(UserType.USER);
+                        }else
+                            user.setUserType(UserType.ADMIN);
+                        arrays.add(user);
+                    }
+                }
+            }
+        }catch (FileNotFoundException e){
+            throw new FileNotFoundException("File does not exist");
+        } catch (IOException e) {
+            throw new IOException("Reading from file " + path + " failed");
+        }
+        return arrays;
+    }
+
+    private static boolean checkIdRoomInRoomDB(String path, Long id)throws Exception{
+        if (path == null || id == 0 )
+            throw new BadRequestException("Invalid incoming data");
+
+        for (Room room : gettingListObjectsFromFileRoomDB(path)){
+            if (room != null && room.getId() == id){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean checkIdUserInUserDB(String path, Long id)throws Exception{
+        if (path == null || id == 0 )
+            throw new BadRequestException("Invalid incoming data");
+
+        for (User user : gettingListObjectsFromFileUserDB(path)){
+            if (user != null && user.getId() == id){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean checkIdHotelInHotelDB(String path, Long id)throws Exception{
+        if (path == null || id == 0 )
+            throw new BadRequestException("Invalid incoming data");
+
+        for (Hotel hotel : gettingListObjectsFromFileHotelDB(path)){
+            if (hotel != null && hotel.getId() == id){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /*private static String gettingOnlyNumericCharacters(String[] arrayLine) {
+        String id = "";
+        for (Character ch : arrayLine[0].toCharArray()) {
+            if (ch != null && Character.isDigit(ch)) {
+                id += ch;
+            }
+        }
+        return id;
+    }*/
 }

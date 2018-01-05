@@ -30,25 +30,19 @@ public class DemoRoom {
         Room room6 = new Room(6006, 3, 40.00, true, true, new Date(), hotel2);
         Room room7 = new Room(7007, 3, 40.00, false, true, new Date(), hotel2);
                                                                                                      //format.parse(date)
-        Filter filter = new Filter(0, 0, false, true, format.parse(date), null, null);
+        Filter filter = new Filter(3, 0, false, true, format.parse(date4), null, null);
 
-        /*RoomDAO.addRoom(room1);
-        RoomDAO.addRoom(room2);
+        //RoomDAO.addRoom(room3);
+        /*RoomDAO.addRoom(room2);
         RoomDAO.addRoom(room3);
         RoomDAO.addRoom(room4);
         RoomDAO.addRoom(room5);*/
 
-        //RoomDAO.addRoom(room5);
+        //RoomDAO.addRoom(room3);
         //RoomDAO.addRoom(room6);
         //RoomDAO.addRoom(room7);
 
-        /*RoomDAO.deleteRoom(room1);
-        RoomDAO.deleteRoom(room2);
-        RoomDAO.deleteRoom(room3);
-        RoomDAO.deleteRoom(room4);
-        RoomDAO.deleteRoom(room5);
-        RoomDAO.deleteRoom(room6);
-        RoomDAO.deleteRoom(room7);*/
+        //RoomDAO.deleteRoom(3003L);
 
         System.out.println("RoomsFinish - " + RoomDAO.findRooms(filter));
 

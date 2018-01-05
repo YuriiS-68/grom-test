@@ -12,22 +12,19 @@ import java.util.Random;
 public class UserDAO extends GeneralDAO{
 
     private static Utils utils = new Utils();
-    //private static final String PATH_USER_DB = "C:\\Users\\Skorodielov\\Desktop\\UserDB.txt";
     //считывание данных - считывание файла
     //обработка данных - маппинг данных
+
     public static User registerUser(User user)throws Exception{
         //проверить на уникальность имя пользователя
         //присвоить пользователю уникальный id
         //присвоить тип пользователя, пароль и страну
         //save user to DB (file)
         if (user == null)
-            throw new BadRequestException("This user is not exist");
+            throw new BadRequestException("User does not exist");
 
         if (checkValidLoginName(utils.getPathUserDB(), user.getUserName()))
             throw new BadRequestException("User with name " + user.getUserName() + " already exists");
-
-
-        checkingReadFile(utils.getPathUserDB());
 
         Random random = new Random();
         user.setId(random.nextLong() / 1000000000000L);
@@ -36,19 +33,19 @@ public class UserDAO extends GeneralDAO{
         }
 
         try(BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(utils.getPathUserDB(), true))){
-            bufferedWriter.append(Long.toString(user.getId())).append(",");
-            bufferedWriter.append(user.getUserName()).append(",");
-            bufferedWriter.append(user.getPassword()).append(",");
-            bufferedWriter.append(user.getCountry()).append(",");
-            bufferedWriter.append(user.getUserType().toString());
-            bufferedWriter.append("\n");
+            bufferedWriter.append(Long.toString(user.getId()) + (","));
+            bufferedWriter.append(user.getUserName() + (","));
+            bufferedWriter.append(user.getPassword() + (","));
+            bufferedWriter.append(user.getCountry() + (","));
+            bufferedWriter.append(user.getUserType().toString() + ("\n"));
         }catch (IOException e){
             throw new IOException("Can not write to file " + utils.getPathUserDB());
         }
         return user;
     }
 
-    public static void login(String userName, String password)throws Exception {
+    //методы входа и выхода из системы оставляем на самый конец
+    /*public static void login(String userName, String password)throws Exception {
         if (userName == null || password == null)
             throw new BadRequestException("Username or password is not exists");
 
@@ -58,25 +55,23 @@ public class UserDAO extends GeneralDAO{
 
             }
         }
-    }
+    }*/
 
     private static boolean checkValidLoginName(String path, String loginName)throws Exception{
         if (path == null || loginName == null)
             throw new BadRequestException("Invalid incoming data");
 
-        int index = 0;
-        for (User el : gettingListObjectsFromFile(path)) {
+        for (User el : gettingListObjectsFromFileUserDB(path)) {
             if (el != null && el.getUserName().equals(loginName)){
                 return true;
             }
-            index++;
         }
         return false;
     }
 
-    private static LinkedList<User> gettingListObjectsFromFile(String path)throws Exception{
+    private static LinkedList<User> gettingListObjectsFromFileUserDB(String path)throws Exception{
         if(path == null)
-            throw new BadRequestException("This path " + path + " is not exists");
+            throw new BadRequestException("This path " + path + " does not exists");
 
         LinkedList<User> arrays = new LinkedList<>();
 
@@ -85,7 +80,6 @@ public class UserDAO extends GeneralDAO{
 
             while ((line = br.readLine()) != null){
                 String[] result = line.split("\n");
-                int index = 0;
                 for (String el : result){
                     if (el != null){
                         String[] fields = el.split(",");
@@ -100,7 +94,6 @@ public class UserDAO extends GeneralDAO{
                             user.setUserType(UserType.ADMIN);
                         arrays.add(user);
                     }
-                    index++;
                 }
             }
         }catch (FileNotFoundException e){
@@ -110,4 +103,16 @@ public class UserDAO extends GeneralDAO{
         }
         return arrays;
     }
+
+    //проверка на цифровые символы... можно её не использовать, так как id в fields[0] генерируется рандомом и содержит только цифровые символы
+
+    /*private static String gettingOnlyNumericCharacters(String[] arrayLine) {
+        String id = "";
+        for (Character ch : arrayLine[0].toCharArray()) {
+            if (ch != null && Character.isDigit(ch)) {
+                id += ch;
+            }
+        }
+        return id;
+    }*/
 }

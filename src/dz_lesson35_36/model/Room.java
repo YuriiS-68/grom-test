@@ -2,10 +2,15 @@ package dz_lesson35_36.model;
 
 import dz_lesson35_36.model.Hotel;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Objects;
 
 public class Room {
+
+    private static final DateFormat FORMAT = new SimpleDateFormat("dd.MM.yyyy");
+
     private long id;
     private int numberOfGuests;
     private double price;
@@ -104,13 +109,14 @@ public class Room {
 
     @Override
     public String toString() {
+        String date = FORMAT.format(dateAvailableFrom);
         return "Room{" +
                 "id=" + id +
                 ", numberOfGuests=" + numberOfGuests +
                 ", price=" + price +
                 ", breakfastIncluded=" + breakfastIncluded +
                 ", petsAllowed=" + petsAllowed +
-                ", dateAvailableFrom=" + dateAvailableFrom +
+                ", dateAvailableFrom=" + date +
                 ", hotel=" + hotel +
                 '}';
     }

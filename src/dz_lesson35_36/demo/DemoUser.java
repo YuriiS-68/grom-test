@@ -12,9 +12,10 @@ public class DemoUser {
         User user3 = new User("Bob", "3333", "Ukraine", UserType.USER);
         User user4 = new User("Tad", "4444", "Germany", UserType.USER);
 
+        UserDAO.registerUser(user1);
+        UserDAO.registerUser(user2);
+        UserDAO.registerUser(user3);
         UserDAO.registerUser(user4);
-        //UserDAO.registerUser(user2);
-        //UserDAO.registerUser(user3);
 
 
     }
