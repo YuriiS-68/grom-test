@@ -30,13 +30,10 @@ public class DemoOrder {
         Room room7 = new Room(7007, 3, 40.00, false, true, new Date(), hotel2);
 
         //OrderDAO.bookRoom(2002, 7347373, 111111);
-        //OrderDAO.bookRoom(2002, 7470839, 111111);
-        //OrderDAO.bookRoom(3003, 1115091, 222222);
+        //OrderDAO.bookRoom(2002, 7312364, 111111);
+        //OrderDAO.bookRoom(3003, 8392838, 222222);
         //OrderDAO.bookRoom(1001, 7364205, 111111);
 
-        //System.out.println(OrderDAO.checkIdInOrderDB(PATH_ORDER_DB, 2002L));
-        OrderDAO.cancelReservation(1001, 7347373L);
-
-
+        //OrderDAO.cancelReservation(2002, 7312364L);
     }
 }

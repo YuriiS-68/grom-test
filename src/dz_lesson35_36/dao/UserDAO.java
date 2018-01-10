@@ -3,15 +3,14 @@ package dz_lesson35_36.dao;
 import dz_lesson35_36.exception.BadRequestException;
 import dz_lesson35_36.model.User;
 import dz_lesson35_36.model.UserType;
-import dz_lesson35_36.model.Utils;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Random;
 
-public class UserDAO extends GeneralDAO{
+public class UserDAO extends GeneralDAO {
 
-    private static Utils utils = new Utils();
     //считывание данных - считывание файла
     //обработка данных - маппинг данных
 
@@ -61,7 +60,7 @@ public class UserDAO extends GeneralDAO{
         if (path == null || loginName == null)
             throw new BadRequestException("Invalid incoming data");
 
-        for (User el : gettingListObjectsFromFileUserDB(path)) {
+        for (User el : gettingListObjectsFromFileUserDB(readFromFile(utils.getPathUserDB()))) {
             if (el != null && el.getUserName().equals(loginName)){
                 return true;
             }
@@ -69,37 +68,27 @@ public class UserDAO extends GeneralDAO{
         return false;
     }
 
-    private static LinkedList<User> gettingListObjectsFromFileUserDB(String path)throws Exception{
-        if(path == null)
-            throw new BadRequestException("This path " + path + " does not exists");
+    private static LinkedList<User> gettingListObjectsFromFileUserDB(ArrayList<String> arrayList)throws Exception{
+        if(arrayList == null)
+            throw new BadRequestException("This arrayList " + arrayList + " does not exists");
 
         LinkedList<User> arrays = new LinkedList<>();
 
-        try (BufferedReader br = new BufferedReader(new FileReader(path))){
-            String line;
-
-            while ((line = br.readLine()) != null){
-                String[] result = line.split("\n");
-                for (String el : result){
-                    if (el != null){
-                        String[] fields = el.split(",");
-                        User user = new User();
-                        user.setId(Long.parseLong(fields[0]));
-                        user.setUserName(fields[1]);
-                        user.setPassword(fields[2]);
-                        user.setCountry(fields[3]);
-                        if (fields[4].equals("USER")){
-                            user.setUserType(UserType.USER);
-                        }else
-                            user.setUserType(UserType.ADMIN);
-                        arrays.add(user);
-                    }
+        for (String el : arrayList){
+            if (el != null){
+                String[] fields = el.split(",");
+                User user = new User();
+                user.setId(Long.parseLong(fields[0]));
+                user.setUserName(fields[1]);
+                user.setPassword(fields[2]);
+                user.setCountry(fields[3]);
+                if (fields[4].equals("USER")){
+                    user.setUserType(UserType.USER);
+                }else {
+                    user.setUserType(UserType.ADMIN);
                 }
+                arrays.add(user);
             }
-        }catch (FileNotFoundException e){
-            throw new FileNotFoundException("File does not exist");
-        } catch (IOException e) {
-            throw new IOException("Reading from file " + path + " failed");
         }
         return arrays;
     }

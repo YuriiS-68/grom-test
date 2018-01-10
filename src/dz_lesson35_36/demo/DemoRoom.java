@@ -32,7 +32,7 @@ public class DemoRoom {
                                                                                                      //format.parse(date)
         Filter filter = new Filter(3, 0, false, true, format.parse(date4), null, null);
 
-        //RoomDAO.addRoom(room3);
+        RoomDAO.addRoom(room5);
         /*RoomDAO.addRoom(room2);
         RoomDAO.addRoom(room3);
         RoomDAO.addRoom(room4);
@@ -42,9 +42,9 @@ public class DemoRoom {
         //RoomDAO.addRoom(room6);
         //RoomDAO.addRoom(room7);
 
-        //RoomDAO.deleteRoom(3003L);
+        //RoomDAO.deleteRoom(5005L);
 
-        System.out.println("RoomsFinish - " + RoomDAO.findRooms(filter));
+        //System.out.println("RoomsFinish - " + RoomDAO.findRooms(filter));
 
     }
 }
