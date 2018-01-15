@@ -30,7 +30,7 @@ public class DemoRoom {
         Room room6 = new Room(6006, 3, 40.00, true, true, new Date(), hotel2);
         Room room7 = new Room(7007, 3, 40.00, false, true, new Date(), hotel2);
                                                                                                      //format.parse(date)
-        Filter filter = new Filter(3, 0, false, true, format.parse(date3), null, null);
+        Filter filter = new Filter(5, 0, false, true, format.parse(date3), "Ukraine", null);
 
         //RoomDAO.addRoom(room5);
         /*RoomDAO.addRoom(room2);

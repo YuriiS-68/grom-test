@@ -4,7 +4,6 @@ import dz_lesson35_36.exception.BadRequestException;
 import dz_lesson35_36.model.Hotel;
 
 import java.io.*;
-import java.util.ArrayList;
 import java.util.LinkedList;
 
 public class HotelDAO extends GeneralDAO {
@@ -15,18 +14,11 @@ public class HotelDAO extends GeneralDAO {
         if (hotel == null)
             throw new BadRequestException("This " + hotel + " is not exist");
 
-        if (checkObjectById(utils.getPathHotelDB(), hotel.getId()))
+        if (checkObjectById(GeneralDAO.getPathHotelDB(), hotel.getId()))
             throw new BadRequestException("Hotel with id " + hotel.getId() + " already exists");
 
-        try(BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(utils.getPathHotelDB(), true))){
-            bufferedWriter.append(Long.toString(hotel.getId()) + (","));
-            bufferedWriter.append(hotel.getCountry() + (","));
-            bufferedWriter.append(hotel.getCity() + (","));
-            bufferedWriter.append(hotel.getStreet() + (","));
-            bufferedWriter.append(hotel.getName() + ("\n"));
-        }catch (IOException e){
-            throw new IOException("Can not write to file " + utils.getPathHotelDB());
-        }
+        writerToFile(hotel);
+
         return hotel;
     }
 
@@ -38,22 +30,10 @@ public class HotelDAO extends GeneralDAO {
         if (idHotel == null)
             throw new BadRequestException("This id " + idHotel + " is not exist");
 
-        if (!checkObjectById(utils.getPathHotelDB(), idHotel))
+        if (!checkObjectById(GeneralDAO.getPathHotelDB(), idHotel))
             throw new BadRequestException("Hotel with id " + idHotel + " does not exist");
 
-        StringBuffer res = new StringBuffer();
-
-        for (Hotel el : gettingListObjectsFromFileHotelDB(readFromFile(utils.getPathHotelDB()))){
-            if (el != null && el.getId() != idHotel){
-                res.append(Long.toString(el.getId()) + (","));
-                res.append(el.getCountry() + (","));
-                res.append(el.getCity() + (","));
-                res.append(el.getStreet() + (","));
-                res.append(el.getName() + ("\n"));
-            }
-        }
-
-        writerInFailBD(utils.getPathHotelDB(), res);
+        writerInFailBD(GeneralDAO.getPathHotelDB(), resultForWriting(idHotel));
     }
 
     public static LinkedList<Hotel> findHotelByName(String name)throws Exception{
@@ -66,7 +46,7 @@ public class HotelDAO extends GeneralDAO {
 
         LinkedList<Hotel> hotels = new LinkedList<>();
 
-        for (Hotel el : gettingListObjectsFromFileHotelDB(readFromFile(utils.getPathHotelDB()))){
+        for (Hotel el : gettingListObjectsFromFileHotelDB()){
             if (el != null && el.getName().equals(name)){
                 hotels.add(el);
             }
@@ -88,7 +68,7 @@ public class HotelDAO extends GeneralDAO {
 
         LinkedList<Hotel> hotels = new LinkedList<>();
 
-        for (Hotel el : gettingListObjectsFromFileHotelDB(readFromFile(utils.getPathHotelDB()))){
+        for (Hotel el : gettingListObjectsFromFileHotelDB()){
             if (el != null && el.getCity().equals(city)){
                 hotels.add(el);
             }
@@ -100,37 +80,75 @@ public class HotelDAO extends GeneralDAO {
         return hotels;
     }
 
-    private static LinkedList<Hotel> gettingListObjectsFromFileHotelDB(ArrayList<String> arrayList)throws Exception{
-        if(arrayList == null)
-            throw new BadRequestException("This arrayList " + arrayList + " is not exists");
-
+    private static LinkedList<Hotel> gettingListObjectsFromFileHotelDB()throws Exception{
         LinkedList<Hotel> arrays = new LinkedList<>();
 
-        for (String el : arrayList){
+        int index = 0;
+        for (String el : readFromFile(GeneralDAO.getPathHotelDB())){
             if (el != null){
-                String[] fields = el.split(",");
-                Hotel hotel = new Hotel();
-                hotel.setId(Long.parseLong(fields[0]));
-                hotel.setCountry(fields[1]);
-                hotel.setCity(fields[2]);
-                hotel.setStreet(fields[3]);
-                hotel.setName(fields[4]);
-                arrays.add(hotel);
+                arrays.add(mapHotels(readFromFile(GeneralDAO.getPathHotelDB()).get(index)));
             }
+            index++;
         }
         return arrays;
+    }
+
+    private static Hotel mapHotels(String string)throws Exception{
+        if (string == null)
+            throw new BadRequestException("String does not exist");
+
+        String[] fields = string.split(",");
+
+        Hotel hotel = new Hotel();
+        hotel.setId(Long.parseLong(fields[0]));
+        hotel.setCountry(fields[1]);
+        hotel.setCity(fields[2]);
+        hotel.setStreet(fields[3]);
+        hotel.setName(fields[4]);
+
+        return hotel;
     }
 
     private static boolean checkObjectById(String path, Long id)throws Exception{
         if (path == null || id == null)
             throw new BadRequestException("Invalid incoming data");
 
-        for (Hotel el : gettingListObjectsFromFileHotelDB(readFromFile(path))) {
+        for (Hotel el : gettingListObjectsFromFileHotelDB()) {
             if (el != null && el.getId() == id){
                 return true;
             }
         }
         return false;
+    }
+
+    private static void writerToFile(Hotel hotel)throws Exception{
+        if (hotel == null)
+            throw new BadRequestException("Hotel does not exist");
+
+        try(BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(GeneralDAO.getPathHotelDB(), true))){
+            bufferedWriter.append(Long.toString(hotel.getId()) + (","));
+            bufferedWriter.append(hotel.getCountry() + (","));
+            bufferedWriter.append(hotel.getCity() + (","));
+            bufferedWriter.append(hotel.getStreet() + (","));
+            bufferedWriter.append(hotel.getName() + ("\n"));
+        }catch (IOException e){
+            throw new IOException("Can not write to file " + GeneralDAO.getPathHotelDB());
+        }
+    }
+
+    private static StringBuffer resultForWriting(Long idHotel)throws Exception{
+        StringBuffer res = new StringBuffer();
+
+        for (Hotel el : gettingListObjectsFromFileHotelDB()){
+            if (el != null && el.getId() != idHotel){
+                res.append(Long.toString(el.getId()) + (","));
+                res.append(el.getCountry() + (","));
+                res.append(el.getCity() + (","));
+                res.append(el.getStreet() + (","));
+                res.append(el.getName() + ("\n"));
+            }
+        }
+        return res;
     }
 }
 

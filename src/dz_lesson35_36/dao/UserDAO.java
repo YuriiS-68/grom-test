@@ -21,7 +21,7 @@ public class UserDAO extends GeneralDAO {
         if (user == null)
             throw new BadRequestException("User does not exist");
 
-        if (!checkValidLoginName(GeneralDAO.getPathUserDB(), user.getUserName()))
+        if (checkValidLoginName(GeneralDAO.getPathUserDB(), user.getUserName()))
             throw new BadRequestException("User with name " + user.getUserName() + " already exists");
 
         assignmentUserId(user);
@@ -50,10 +50,10 @@ public class UserDAO extends GeneralDAO {
 
         for (User el : gettingListObjectsFromFileUserDB()) {
             if (el != null && el.getUserName().equals(loginName)){
-                return false;
+                return true;
             }
         }
-        return true;
+        return false;
     }
 
     private static LinkedList<User> gettingListObjectsFromFileUserDB()throws Exception{

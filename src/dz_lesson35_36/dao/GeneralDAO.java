@@ -1,7 +1,6 @@
 package dz_lesson35_36.dao;
 
 import dz_lesson35_36.exception.BadRequestException;
-import dz_lesson35_36.model.Utils;
 
 import java.io.*;
 import java.text.DateFormat;
@@ -10,12 +9,26 @@ import java.util.ArrayList;
 
 public class GeneralDAO <T> {
 
-    public static Utils utils = new Utils();
     private static String pathUserDB = "C:\\Users\\Skorodielov\\Desktop\\UserDB.txt";
+    private static String pathHotelDB = "C:\\Users\\Skorodielov\\Desktop\\HotelDB.txt";
+    private static String pathRoomDB = "C:\\Users\\Skorodielov\\Desktop\\RoomDB.txt";
+    private static String pathOrderDB = "C:\\Users\\Skorodielov\\Desktop\\OrderDB.txt";
     public static final DateFormat FORMAT = new SimpleDateFormat("dd.MM.yyyy");
 
     public static String getPathUserDB() {
         return pathUserDB;
+    }
+
+    public static String getPathHotelDB() {
+        return pathHotelDB;
+    }
+
+    public static String getPathRoomDB() {
+        return pathRoomDB;
+    }
+
+    public static String getPathOrderDB() {
+        return pathOrderDB;
     }
 
     public static ArrayList<String> readFromFile(String path)throws Exception{
