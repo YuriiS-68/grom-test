@@ -18,7 +18,7 @@ public class OrderDAO extends GeneralDAO{
         if(!checkIdRoomInRoomDB(utils.getPathRoomDB(), roomId))
             throw new BadRequestException("Room with id " + roomId + " is not exist");
 
-        if (!checkIdUserInUserDB(utils.getPathUserDB(), userId))
+        if (!checkIdUserInUserDB(GeneralDAO.getPathUserDB(), userId))
             throw new BadRequestException("User with id " + userId + " is not exist");
 
         if (!checkIdHotelInHotelDB(utils.getPathHotelDB(), hotelId))
@@ -94,30 +94,6 @@ public class OrderDAO extends GeneralDAO{
         }
 
         writerInFailBD(utils.getPathOrderDB(), res);
-    }
-
-    private static User findUserById(Long id)throws Exception{
-        if (id == null)
-            throw new BadRequestException("This does  " + id + " not exist ");
-
-        for (User user : gettingListObjectsFromFileUserDB(readFromFile(utils.getPathUserDB()))){
-            if (user != null && user.getId() == id){
-                return user;
-            }
-        }
-        throw new BadRequestException("User with " + id + " no such found.");
-    }
-
-    private static Room findRoomById(Long id)throws Exception{
-        if (id == null)
-            throw new BadRequestException("This does  " + id + " not exist ");
-
-        for (Room room : gettingListObjectsFromFileRoomDB(readFromFile(utils.getPathRoomDB()))){
-            if (room != null && room.getId() == id){
-                return room;
-            }
-        }
-        throw new BadRequestException("Room with " + id + " no such found.");
     }
 
     private static boolean checkIdRoomInOrderDB(String path, Long id)throws Exception{
@@ -226,6 +202,30 @@ public class OrderDAO extends GeneralDAO{
             }
         }
         return arrays;
+    }
+
+    private static User findUserById(Long id)throws Exception{
+        if (id == null)
+            throw new BadRequestException("This does  " + id + " not exist ");
+
+        for (User user : gettingListObjectsFromFileUserDB(readFromFile(GeneralDAO.getPathUserDB()))){
+            if (user != null && user.getId() == id){
+                return user;
+            }
+        }
+        throw new BadRequestException("User with " + id + " no such found.");
+    }
+
+    private static Room findRoomById(Long id)throws Exception{
+        if (id == null)
+            throw new BadRequestException("This does  " + id + " not exist ");
+
+        for (Room room : gettingListObjectsFromFileRoomDB(readFromFile(utils.getPathRoomDB()))){
+            if (room != null && room.getId() == id){
+                return room;
+            }
+        }
+        throw new BadRequestException("Room with " + id + " no such found.");
     }
 
     private static Hotel findHotelById(Long id)throws Exception{

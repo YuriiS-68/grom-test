@@ -61,12 +61,12 @@ public class RoomDAO extends GeneralDAO{
 
         LinkedList<Room> foundRooms = new LinkedList<>();
 
-        for (Room el : gettingListObjectsFromFileRoomDB(readFromFile(utils.getPathRoomDB()))){
-            if (el.getNumberOfGuests() == filter.getNumberOfGuests() || filter.getNumberOfGuests() == 0 && el.getPrice() == filter.getPrice() || filter.getPrice() == 0){
-                if (el.getDateAvailableFrom().compareTo(filter.getDateAvailableFrom()) >= 0 || filter.getDateAvailableFrom() == null) {
-                    if (el.isPetsAllowed() == filter.isPetsAllowed() && el.isBreakfastIncluded() == filter.isBreakfastIncluded()) {
-                        if (el.getHotel().getCountry().equals(filter.getCountry()) || filter.getCountry() == null && el.getHotel().getCity().equals(filter.getCity()) || filter.getCity() == null) {
-                            foundRooms.add(el);
+        for (Room room : gettingListObjectsFromFileRoomDB(readFromFile(utils.getPathRoomDB()))){
+            if ((room.getNumberOfGuests() == filter.getNumberOfGuests()) || filter.getNumberOfGuests() == 0 && room.getPrice() == filter.getPrice() || filter.getPrice() == 0){
+                if (room.getDateAvailableFrom().compareTo(filter.getDateAvailableFrom()) >= 0 || filter.getDateAvailableFrom() == null) {
+                    if (room.isPetsAllowed() == filter.isPetsAllowed() && room.isBreakfastIncluded() == filter.isBreakfastIncluded()) {
+                        if (room.getHotel().getCountry().equals(filter.getCountry()) || filter.getCountry() == null && room.getHotel().getCity().equals(filter.getCity()) || filter.getCity() == null) {
+                            foundRooms.add(room);
                         }
                     }
                 }
@@ -98,6 +98,7 @@ public class RoomDAO extends GeneralDAO{
                     }
                 }
                 room.setHotel(findHotelById(Long.parseLong(idHotel)));
+                System.out.println("Room id - " + room.getId() + "; number of guests - " + room.getNumberOfGuests() + "; Country - " + room.getHotel().getCountry());
                 arrays.add(room);
             }
         }
