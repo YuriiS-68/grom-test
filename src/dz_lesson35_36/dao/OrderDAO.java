@@ -24,20 +24,23 @@ public class OrderDAO extends GeneralDAO{
         if (!checkIdHotelInHotelDB(GeneralDAO.getPathHotelDB(), hotelId))
             throw new BadRequestException("Hotel with id " + hotelId + " is not exist");
 
+        writerToFile(mapOrder(roomId, userId));
+    }
+
+    private static Order mapOrder(long roomId, long userId)throws Exception{
         Order order = new Order();
 
         assignmentOrderId(order);
 
         String dateFrom = "23.11.2017";
         String dateTo = "06.12.2017";
+        Date dateStart = FORMAT.parse(dateFrom);
+        Date dateFinish = FORMAT.parse(dateTo);
 
         order.setUser(findUserById(userId));
         order.setRoom(findRoomById(roomId));
         order.setDateFrom(FORMAT.parse(dateFrom));
         order.setDateTo(FORMAT.parse(dateTo));
-
-        Date dateStart = FORMAT.parse(dateFrom);
-        Date dateFinish = FORMAT.parse(dateTo);
 
         long difference = dateStart.getTime() - dateFinish.getTime();
         int days = (int)(difference / (24 * 60 * 60 * 1000));
@@ -48,13 +51,20 @@ public class OrderDAO extends GeneralDAO{
 
         order.setMoneyPaid(orderCost);
 
+        return order;
+    }
+
+    private static void writerToFile(Order order)throws Exception{
+        if (order == null)
+            throw new BadRequestException("Room does not exist");
+
         try(BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(GeneralDAO.getPathOrderDB(), true))){
             bufferedWriter.append(Long.toString(order.getId()) + (","));
             bufferedWriter.append(order.getUser().toString() + (","));
             bufferedWriter.append(order.getRoom().toString() + (","));
-            bufferedWriter.append(dateFrom + (","));
-            bufferedWriter.append(dateTo + (","));
-            bufferedWriter.append(Double.toString(orderCost) + ("\n"));
+            bufferedWriter.append(FORMAT.format(order.getDateFrom()) + (","));
+            bufferedWriter.append(FORMAT.format(order.getDateTo()) + (","));
+            bufferedWriter.append(Double.toString(order.getMoneyPaid()) + ("\n"));
         }catch (IOException e){
             throw new IOException("Can not write to file " + GeneralDAO.getPathOrderDB());
         }
@@ -70,26 +80,7 @@ public class OrderDAO extends GeneralDAO{
         if (!checkIdUserInOrderDB(GeneralDAO.getPathOrderDB(), userId))
             throw new BadRequestException("User with id " + userId + " is not exist");
 
-        StringBuffer res = new StringBuffer();
-
-        int index = 0;
-        for (Order el : gettingListObjectsFromFileOrderDB()){
-            if (el != null && el.getUser().getId() == userId && el.getRoom().getId() == roomId) {
-                el = null;
-            }else {
-                if (el != null){
-                    res.append(Long.toString(el.getId()) + (","));
-                    res.append(el.getUser().toString() + (","));
-                    res.append(el.getRoom().toString() + (","));
-                    res.append(FORMAT.format(el.getDateFrom()) + (","));
-                    res.append(FORMAT.format(el.getDateTo()) + (","));
-                    res.append(Double.toString(el.getMoneyPaid()) + ("\n"));
-                }
-            }
-            index++;
-        }
-
-        writerInFailBD(GeneralDAO.getPathOrderDB(), res);
+        writerInFailBD(GeneralDAO.getPathOrderDB(), resultForWriting(roomId, userId));
     }
 
     private static boolean checkIdRoomInOrderDB(String path, Long id)throws Exception{
@@ -339,13 +330,25 @@ public class OrderDAO extends GeneralDAO{
         }
     }
 
-    /*private static String gettingOnlyNumericCharacters(String[] arrayLine) {
-        String id = "";
-        for (Character ch : arrayLine[0].toCharArray()) {
-            if (ch != null && Character.isDigit(ch)) {
-                id += ch;
+    private static StringBuffer resultForWriting(long roomId, long userId)throws Exception{
+        StringBuffer res = new StringBuffer();
+
+        int index = 0;
+        for (Order el : gettingListObjectsFromFileOrderDB()){
+            if (el != null && el.getUser().getId() == userId && el.getRoom().getId() == roomId) {
+                el = null;
+            }else {
+                if (el != null){
+                    res.append(Long.toString(el.getId()) + (","));
+                    res.append(el.getUser().toString() + (","));
+                    res.append(el.getRoom().toString() + (","));
+                    res.append(FORMAT.format(el.getDateFrom()) + (","));
+                    res.append(FORMAT.format(el.getDateTo()) + (","));
+                    res.append(Double.toString(el.getMoneyPaid()) + ("\n"));
+                }
             }
+            index++;
         }
-        return id;
-    }*/
+        return res;
+    }
 }
