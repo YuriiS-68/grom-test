@@ -14,7 +14,7 @@ public class HotelDAO extends GeneralDAO {
         if (hotel == null)
             throw new BadRequestException("This " + hotel + " is not exist");
 
-        if (checkObjectById(GeneralDAO.getPathHotelDB(), hotel.getId()))
+        if (!checkObjectById(hotel.getId()))
             throw new BadRequestException("Hotel with id " + hotel.getId() + " already exists");
 
         writerToFile(hotel);
@@ -30,7 +30,7 @@ public class HotelDAO extends GeneralDAO {
         if (idHotel == null)
             throw new BadRequestException("This id " + idHotel + " is not exist");
 
-        if (!checkObjectById(GeneralDAO.getPathHotelDB(), idHotel))
+        if (checkObjectById(idHotel))
             throw new BadRequestException("Hotel with id " + idHotel + " does not exist");
 
         writerInFailBD(GeneralDAO.getPathHotelDB(), resultForWriting(idHotel));
@@ -109,16 +109,16 @@ public class HotelDAO extends GeneralDAO {
         return hotel;
     }
 
-    private static boolean checkObjectById(String path, Long id)throws Exception{
-        if (path == null || id == null)
+    private static boolean checkObjectById(Long id)throws Exception{
+        if (id == null)
             throw new BadRequestException("Invalid incoming data");
 
         for (Hotel el : gettingListObjectsFromFileHotelDB()) {
             if (el != null && el.getId() == id){
-                return true;
+                return false;
             }
         }
-        return false;
+        return true;
     }
 
     private static void writerToFile(Hotel hotel)throws Exception{

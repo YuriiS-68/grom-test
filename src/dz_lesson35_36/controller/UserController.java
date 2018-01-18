@@ -6,9 +6,9 @@ import dz_lesson35_36.service.UserService;
 
 public class UserController {
 
-    private UserService userService = new UserService();
+    private static UserService userService = new UserService();
 
-    public User registerUser(User user)throws Exception{
+    public static User registerUser(User user)throws Exception{
         if (user == null)
             throw new BadRequestException("This " + user + " is not exist");
 

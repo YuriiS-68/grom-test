@@ -6,9 +6,9 @@ import dz_lesson35_36.dao.UserDAO;
 
 public class UserService {
 
-    private UserDAO userDAO = new UserDAO();
+    private static UserDAO userDAO = new UserDAO();
 
-    public User registerUser(User user)throws Exception{
+    public static User registerUser(User user)throws Exception{
         //check business logic
         if (user == null)
             throw new BadRequestException("This " + user + " is not exist");

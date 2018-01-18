@@ -15,13 +15,13 @@ public class OrderDAO extends GeneralDAO{
         if (roomId == 0 || userId == 0 || hotelId == 0)
             throw new BadRequestException("Invalid incoming data");
 
-        if(!checkIdRoomInRoomDB(GeneralDAO.getPathRoomDB(), roomId))
+        if(!checkIdRoom(roomId))
             throw new BadRequestException("Room with id " + roomId + " is not exist");
 
-        if (!checkIdUserInUserDB(GeneralDAO.getPathUserDB(), userId))
+        if (!checkIdUser(userId))
             throw new BadRequestException("User with id " + userId + " is not exist");
 
-        if (!checkIdHotelInHotelDB(GeneralDAO.getPathHotelDB(), hotelId))
+        if (!checkIdHotel(hotelId))
             throw new BadRequestException("Hotel with id " + hotelId + " is not exist");
 
         writerToFile(mapOrder(roomId, userId));
@@ -54,37 +54,21 @@ public class OrderDAO extends GeneralDAO{
         return order;
     }
 
-    private static void writerToFile(Order order)throws Exception{
-        if (order == null)
-            throw new BadRequestException("Room does not exist");
-
-        try(BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(GeneralDAO.getPathOrderDB(), true))){
-            bufferedWriter.append(Long.toString(order.getId()) + (","));
-            bufferedWriter.append(order.getUser().toString() + (","));
-            bufferedWriter.append(order.getRoom().toString() + (","));
-            bufferedWriter.append(FORMAT.format(order.getDateFrom()) + (","));
-            bufferedWriter.append(FORMAT.format(order.getDateTo()) + (","));
-            bufferedWriter.append(Double.toString(order.getMoneyPaid()) + ("\n"));
-        }catch (IOException e){
-            throw new IOException("Can not write to file " + GeneralDAO.getPathOrderDB());
-        }
-    }
-
     public static void cancelReservation(long roomId, long userId)throws Exception{
         if (roomId == 0 || userId == 0)
             throw new BadRequestException("Invalid incoming data");
 
-        if(!checkIdRoomInOrderDB(GeneralDAO.getPathOrderDB(), roomId))
+        if(!checkIdRoomInOrderDB(roomId))
             throw new BadRequestException("Room with id " + roomId + " is not exist");
 
-        if (!checkIdUserInOrderDB(GeneralDAO.getPathOrderDB(), userId))
+        if (!checkIdUserInOrderDB(userId))
             throw new BadRequestException("User with id " + userId + " is not exist");
 
         writerInFailBD(GeneralDAO.getPathOrderDB(), resultForWriting(roomId, userId));
     }
 
-    private static boolean checkIdRoomInOrderDB(String path, Long id)throws Exception{
-        if (path == null || id == 0 )
+    private static boolean checkIdRoomInOrderDB(Long id)throws Exception{
+        if (id == 0 )
             throw new BadRequestException("Invalid incoming data");
 
         for (Order el : gettingListObjectsFromFileOrderDB()){
@@ -95,8 +79,8 @@ public class OrderDAO extends GeneralDAO{
         return false;
     }
 
-    private static boolean checkIdUserInOrderDB(String path, Long id)throws Exception{
-        if (path == null || id == 0 )
+    private static boolean checkIdUserInOrderDB(Long id)throws Exception{
+        if (id == 0 )
             throw new BadRequestException("Invalid incoming data");
 
         for (Order el : gettingListObjectsFromFileOrderDB()){
@@ -283,8 +267,8 @@ public class OrderDAO extends GeneralDAO{
         return user;
     }
 
-    private static boolean checkIdRoomInRoomDB(String path, Long id)throws Exception{
-        if (path == null || id == 0 )
+    private static boolean checkIdRoom(Long id)throws Exception{
+        if (id == 0 )
             throw new BadRequestException("Invalid incoming data");
 
         for (Room room : gettingListObjectsFromFileRoomDB()){
@@ -295,8 +279,8 @@ public class OrderDAO extends GeneralDAO{
         return false;
     }
 
-    private static boolean checkIdUserInUserDB(String path, Long id)throws Exception{
-        if (path == null || id == 0 )
+    private static boolean checkIdUser(Long id)throws Exception{
+        if (id == 0 )
             throw new BadRequestException("Invalid incoming data");
 
         for (User user : gettingListObjectsFromFileUserDB()){
@@ -307,8 +291,8 @@ public class OrderDAO extends GeneralDAO{
         return false;
     }
 
-    private static boolean checkIdHotelInHotelDB(String path, Long id)throws Exception{
-        if (path == null || id == 0 )
+    private static boolean checkIdHotel(Long id)throws Exception{
+        if (id == 0 )
             throw new BadRequestException("Invalid incoming data");
 
         for (Hotel hotel : gettingListObjectsFromFileHotelDB()){
@@ -327,6 +311,22 @@ public class OrderDAO extends GeneralDAO{
         order.setId(random.nextInt());
         if (order.getId() < 0){
             order.setId(-1 * order.getId());
+        }
+    }
+
+    private static void writerToFile(Order order)throws Exception{
+        if (order == null)
+            throw new BadRequestException("Room does not exist");
+
+        try(BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(GeneralDAO.getPathOrderDB(), true))){
+            bufferedWriter.append(Long.toString(order.getId()) + (","));
+            bufferedWriter.append(order.getUser().toString() + (","));
+            bufferedWriter.append(order.getRoom().toString() + (","));
+            bufferedWriter.append(FORMAT.format(order.getDateFrom()) + (","));
+            bufferedWriter.append(FORMAT.format(order.getDateTo()) + (","));
+            bufferedWriter.append(Double.toString(order.getMoneyPaid()) + ("\n"));
+        }catch (IOException e){
+            throw new IOException("Can not write to file " + GeneralDAO.getPathOrderDB());
         }
     }
 

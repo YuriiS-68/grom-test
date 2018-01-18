@@ -6,6 +6,7 @@ import java.io.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 public class GeneralDAO <T> {
 
@@ -14,22 +15,6 @@ public class GeneralDAO <T> {
     private static String pathRoomDB = "C:\\Users\\Skorodielov\\Desktop\\RoomDB.txt";
     private static String pathOrderDB = "C:\\Users\\Skorodielov\\Desktop\\OrderDB.txt";
     public static final DateFormat FORMAT = new SimpleDateFormat("dd.MM.yyyy");
-
-    public static String getPathUserDB() {
-        return pathUserDB;
-    }
-
-    public static String getPathHotelDB() {
-        return pathHotelDB;
-    }
-
-    public static String getPathRoomDB() {
-        return pathRoomDB;
-    }
-
-    public static String getPathOrderDB() {
-        return pathOrderDB;
-    }
 
     public static ArrayList<String> readFromFile(String path)throws Exception{
         if(path == null)
@@ -56,6 +41,31 @@ public class GeneralDAO <T> {
         return arrayList;
     }
 
+    /*private LinkedList<T> getObjectsFromDB()throws Exception{
+        LinkedList<T> arrays = new LinkedList<>();
+
+        int index = 0;
+        for (String el : readFromFile(GeneralDAO.getPathUserDB())){
+            if (el != null){
+                arrays.add(mapUsers(readFromFile(GeneralDAO.getPathUserDB()).get(index)));
+            }
+            index++;
+        }
+        return arrays;
+    }
+
+    private static <T> boolean checkObjectById(String path, Long id)throws Exception{
+        if (path == null || id == null)
+            throw new BadRequestException("Invalid incoming data");
+
+        for (T el : gettingListObjectsFromFileHotelDB()) {
+            if (el != null && el.getId() == id){
+                return true;
+            }
+        }
+        return false;
+    }*/
+
     /*private T findUserById(Long id)throws Exception{
         if (id == null)
             throw new BadRequestException("This does  " + id + " not exist ");
@@ -74,5 +84,21 @@ public class GeneralDAO <T> {
         }catch (IOException e){
             throw new IOException("Can not write to file " + path);
         }
+    }
+
+    public static String getPathUserDB() {
+        return pathUserDB;
+    }
+
+    public static String getPathHotelDB() {
+        return pathHotelDB;
+    }
+
+    public static String getPathRoomDB() {
+        return pathRoomDB;
+    }
+
+    public static String getPathOrderDB() {
+        return pathOrderDB;
     }
 }

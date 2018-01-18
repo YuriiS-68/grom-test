@@ -14,7 +14,7 @@ public class RoomDAO extends GeneralDAO{
         if (room == null)
             throw new BadRequestException("This " + room + " is not exist");
 
-        if (checkObjectById(GeneralDAO.getPathRoomDB(), room.getId()))
+        if (!checkObjectById(room.getId()))
             throw new BadRequestException("Room with id " + room.getId() + " in file RoomDB already exists.");
 
         writerToFile(room);
@@ -26,7 +26,7 @@ public class RoomDAO extends GeneralDAO{
         if (idRoom == null)
             throw new BadRequestException("This id " + idRoom + " is not exist.");
 
-        if (!checkObjectById(GeneralDAO.getPathRoomDB(), idRoom))
+        if (checkObjectById(idRoom))
             throw new BadRequestException("Room with id " + idRoom + " in file RoomDB not found.");
 
         writerInFailBD(GeneralDAO.getPathRoomDB(), resultForWriting(idRoom));
@@ -39,17 +39,45 @@ public class RoomDAO extends GeneralDAO{
         LinkedList<Room> foundRooms = new LinkedList<>();
 
         for (Room room : gettingListObjectsFromFileRoomDB()){
-            if ((room.getNumberOfGuests() == filter.getNumberOfGuests() || filter.getNumberOfGuests() == 0) && (room.getPrice() == filter.getPrice() || filter.getPrice() == 0)){
+            if (filterCheck(room, filter)){
+                foundRooms.add(room);
+            }
+            /*if ((filter.getNumberOfGuests() == 0 || room.getNumberOfGuests() == filter.getNumberOfGuests()) && (filter.getPrice() == 0 || room.getPrice() == filter.getPrice())){
                 if (filter.getDateAvailableFrom() == null || room.getDateAvailableFrom().compareTo(filter.getDateAvailableFrom()) >= 0) {
                     if (room.isPetsAllowed() == filter.isPetsAllowed() && room.isBreakfastIncluded() == filter.isBreakfastIncluded()) {
-                        if ((room.getHotel().getCountry().equals(filter.getCountry()) || filter.getCountry() == null) && (room.getHotel().getCity().equals(filter.getCity()) || filter.getCity() == null)) {
+                        if ((filter.getCountry() == null || room.getHotel().getCountry().equals(filter.getCountry())) && (filter.getCity() == null || room.getHotel().getCity().equals(filter.getCity()))) {
                             foundRooms.add(room);
                         }
                     }
                 }
-            }
+            }*/
         }
         return foundRooms;
+    }
+
+    private static boolean filterCheck(Room room, Filter filter)throws Exception{
+        if (room == null || filter == null)
+            throw new BadRequestException("Invalid incoming data");
+
+        if (filter.getNumberOfGuests() != 0 && room.getNumberOfGuests() != filter.getNumberOfGuests())
+            return false;
+
+        if (filter.getPrice() != 0 && room.getPrice() != filter.getPrice())
+            return false;
+
+        if (filter.getDateAvailableFrom() != null && (room.getDateAvailableFrom().compareTo(filter.getDateAvailableFrom()) != 0) && (room.getDateAvailableFrom().compareTo(filter.getDateAvailableFrom()) <= 0))
+            return false;
+
+        if (room.isPetsAllowed() != filter.isPetsAllowed() && room.isBreakfastIncluded() != filter.isBreakfastIncluded())
+            return false;
+
+        if (filter.getCountry() != null && (!room.getHotel().getCountry().equals(filter.getCountry())))
+            return false;
+
+        if (filter.getCity() != null && (!room.getHotel().getCity().equals(filter.getCity())))
+            return false;
+
+        return true;
     }
 
     private static LinkedList<Room> gettingListObjectsFromFileRoomDB()throws Exception{
@@ -130,16 +158,16 @@ public class RoomDAO extends GeneralDAO{
         throw new BadRequestException("Hotel with " + id + " no such found.");
     }
 
-    private static boolean checkObjectById(String path, Long id)throws Exception{
-        if (path == null || id == null)
+    private static boolean checkObjectById(Long id)throws Exception{
+        if (id == null)
             throw new BadRequestException("Invalid incoming data");
 
         for (Room el : gettingListObjectsFromFileRoomDB()){
             if (el != null && el.getId() == id){
-                return true;
+                return false;
             }
         }
-        return false;
+        return true;
     }
 
     private static void writerToFile(Room room)throws Exception{
