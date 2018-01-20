@@ -3,7 +3,7 @@ package dz_lesson35_36.model;
 import java.util.Date;
 import java.util.Objects;
 
-public class Order {
+public class Order extends IdEntity{
     private long id;
     private User user;
     private Room room;

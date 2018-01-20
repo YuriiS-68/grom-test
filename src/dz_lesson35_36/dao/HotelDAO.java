@@ -80,7 +80,7 @@ public class HotelDAO extends GeneralDAO {
         return hotels;
     }
 
-    private static LinkedList<Hotel> gettingListObjectsFromFileHotelDB()throws Exception{
+    public static LinkedList<Hotel> gettingListObjectsFromFileHotelDB()throws Exception{
         LinkedList<Hotel> arrays = new LinkedList<>();
 
         int index = 0;
@@ -121,21 +121,6 @@ public class HotelDAO extends GeneralDAO {
         return true;
     }
 
-    private static void writerToFile(Hotel hotel)throws Exception{
-        if (hotel == null)
-            throw new BadRequestException("Hotel does not exist");
-
-        try(BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(GeneralDAO.getPathHotelDB(), true))){
-            bufferedWriter.append(Long.toString(hotel.getId()) + (","));
-            bufferedWriter.append(hotel.getCountry() + (","));
-            bufferedWriter.append(hotel.getCity() + (","));
-            bufferedWriter.append(hotel.getStreet() + (","));
-            bufferedWriter.append(hotel.getName() + ("\n"));
-        }catch (IOException e){
-            throw new IOException("Can not write to file " + GeneralDAO.getPathHotelDB());
-        }
-    }
-
     private static StringBuffer resultForWriting(Long idHotel)throws Exception{
         StringBuffer res = new StringBuffer();
 
@@ -149,6 +134,21 @@ public class HotelDAO extends GeneralDAO {
             }
         }
         return res;
+    }
+
+    private static void writerToFile(Hotel hotel)throws Exception{
+        if (hotel == null)
+            throw new BadRequestException("Hotel does not exist");
+
+        try(BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(GeneralDAO.getPathHotelDB(), true))){
+            bufferedWriter.append(Long.toString(hotel.getId()) + (","));
+            bufferedWriter.append(hotel.getCountry() + (","));
+            bufferedWriter.append(hotel.getCity() + (","));
+            bufferedWriter.append(hotel.getStreet() + (","));
+            bufferedWriter.append(hotel.getName() + ("\n"));
+        }catch (IOException e){
+            throw new IOException("Can not write to file " + GeneralDAO.getPathHotelDB());
+        }
     }
 }
 

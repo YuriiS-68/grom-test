@@ -1,7 +1,7 @@
 package dz_lesson35_36.model;
 
-public class User {
-    private long id;
+public class User extends IdEntity{
+    private Long id;
     private String userName;
     private String password;
     private String country;
@@ -18,7 +18,7 @@ public class User {
         this.userType = userType;
     }
 
-    public User(long id, String userName, String password, String country, UserType userType) {
+    public User(Long id, String userName, String password, String country, UserType userType) {
         this.id = id;
         this.userName = userName;
         this.password = password;

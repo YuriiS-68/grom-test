@@ -1,20 +1,23 @@
 package dz_lesson35_36.dao;
 
 import dz_lesson35_36.exception.BadRequestException;
+import dz_lesson35_36.model.IdEntity;
 
 import java.io.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.Random;
 
-public class GeneralDAO <T> {
+public abstract class GeneralDAO <T>{
 
     private static String pathUserDB = "C:\\Users\\Skorodielov\\Desktop\\UserDB.txt";
     private static String pathHotelDB = "C:\\Users\\Skorodielov\\Desktop\\HotelDB.txt";
     private static String pathRoomDB = "C:\\Users\\Skorodielov\\Desktop\\RoomDB.txt";
     private static String pathOrderDB = "C:\\Users\\Skorodielov\\Desktop\\OrderDB.txt";
-    public static final DateFormat FORMAT = new SimpleDateFormat("dd.MM.yyyy");
+    private static String pathToDB;
+    private static final DateFormat FORMAT = new SimpleDateFormat("dd.MM.yyyy");
 
     public static ArrayList<String> readFromFile(String path)throws Exception{
         if(path == null)
@@ -41,20 +44,47 @@ public class GeneralDAO <T> {
         return arrayList;
     }
 
-    /*private LinkedList<T> getObjectsFromDB()throws Exception{
+    public static void writerInFailBD(String path, StringBuffer content)throws Exception{
+        try(BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(path))){
+            bufferedWriter.append(content);
+        }catch (IOException e){
+            throw new IOException("Can not write to file " + path);
+        }
+    }
+
+    private LinkedList<T> getObjectsFromDB()throws Exception{
         LinkedList<T> arrays = new LinkedList<>();
 
         int index = 0;
-        for (String el : readFromFile(GeneralDAO.getPathUserDB())){
+        for (String el : readFromFile(getPathToDB())){
             if (el != null){
-                arrays.add(mapUsers(readFromFile(GeneralDAO.getPathUserDB()).get(index)));
+                //arrays.add(mapObjects(readFromFile(getPathToDB()).get(index)));
             }
             index++;
         }
         return arrays;
     }
 
-    private static <T> boolean checkObjectById(String path, Long id)throws Exception{
+    /*private T mapObjects(String string)throws Exception{
+        if (string == null)
+            throw new BadRequestException("String does not exist");
+
+        String[] fields = string.split(",");
+
+        T object = (T) new Object();
+        object.setId(Long.parseLong(fields[0]));
+        object.setUserName(fields[1]);
+        object.setPassword(fields[2]);
+        object.setCountry(fields[3]);
+        if (fields[4].equals("USER")){
+            object.setUserType(UserType.USER);
+        }else {
+            object.setUserType(UserType.ADMIN);
+        }
+        return object;
+    }*/
+
+    /*private static <T> boolean checkObjectById(String path, Long id)throws Exception{
         if (path == null || id == null)
             throw new BadRequestException("Invalid incoming data");
 
@@ -66,25 +96,31 @@ public class GeneralDAO <T> {
         return false;
     }*/
 
-    /*private T findUserById(Long id)throws Exception{
-        if (id == null)
-            throw new BadRequestException("This does  " + id + " not exist ");
+    public  static <T extends IdEntity> void assignmentObjectId(T t)throws Exception{
+        if (t == null)
+            throw new BadRequestException("User does not exist");
 
-        for (T el : gettingListObjectsFromFileUserDB(readFromFile(utils.getPathUserDB()))){
-            if (el != null && el.getId() == id){
-                return el;
-            }
-        }
-        throw new BadRequestException("User with " + id + " no such found.");
-    }*/
-
-    public static void writerInFailBD(String path, StringBuffer content)throws Exception{
-        try(BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(path))){
-            bufferedWriter.append(content);
-        }catch (IOException e){
-            throw new IOException("Can not write to file " + path);
+        Random random = new Random();
+        t.setId(random.nextInt());
+        if (t.getId() < 0){
+            t.setId(-1 * t.getId());
         }
     }
+
+    /*public static <T extends IdEntity> void writerToFile(T t)throws Exception{
+        if (t == null)
+            throw new BadRequestException("Invalid incoming data");
+
+        try(BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(GeneralDAO.getPathUserDB(), true))){
+            bufferedWriter.append(Long.toString(t.getId()) + (","));
+            bufferedWriter.append(t.getUserName() + (","));
+            bufferedWriter.append(t.getPassword() + (","));
+            bufferedWriter.append(t.getCountry() + (","));
+            bufferedWriter.append(t.getUserType() + ("\n"));
+        }catch (IOException e){
+            throw new IOException("Can not write to file " + GeneralDAO.getPathUserDB());
+        }
+    }*/
 
     public static String getPathUserDB() {
         return pathUserDB;
@@ -100,5 +136,17 @@ public class GeneralDAO <T> {
 
     public static String getPathOrderDB() {
         return pathOrderDB;
+    }
+
+    public static String getPathToDB() {
+        return pathToDB;
+    }
+
+    public static DateFormat getFORMAT() {
+        return FORMAT;
+    }
+
+    public static void setPathToDB(String pathToDB) {
+        GeneralDAO.pathToDB = pathToDB;
     }
 }

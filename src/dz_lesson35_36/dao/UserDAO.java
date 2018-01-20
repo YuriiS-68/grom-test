@@ -6,7 +6,6 @@ import dz_lesson35_36.model.UserType;
 
 import java.io.*;
 import java.util.LinkedList;
-import java.util.Random;
 
 public class UserDAO extends GeneralDAO {
 
@@ -24,7 +23,7 @@ public class UserDAO extends GeneralDAO {
         if (checkValidLoginName(GeneralDAO.getPathUserDB(), user.getUserName()))
             throw new BadRequestException("User with name " + user.getUserName() + " already exists");
 
-        assignmentUserId(user);
+        assignmentObjectId(user);
 
         writerToFile(user);
 
@@ -56,7 +55,7 @@ public class UserDAO extends GeneralDAO {
         return false;
     }
 
-    private static LinkedList<User> gettingListObjectsFromFileUserDB()throws Exception{
+    public static LinkedList<User> gettingListObjectsFromFileUserDB()throws Exception{
         LinkedList<User> arrays = new LinkedList<>();
 
         int index = 0;
@@ -88,17 +87,6 @@ public class UserDAO extends GeneralDAO {
         return user;
     }
 
-    private static void assignmentUserId(User user)throws Exception{
-        if (user == null)
-            throw new BadRequestException("User does not exist");
-
-        Random random = new Random();
-        user.setId(random.nextInt());
-        if (user.getId() < 0){
-            user.setId(-1 * user.getId());
-        }
-    }
-
     private static void writerToFile(User user)throws Exception{
         if (user == null)
             throw new BadRequestException("User does not exist");
@@ -113,16 +101,4 @@ public class UserDAO extends GeneralDAO {
             throw new IOException("Can not write to file " + GeneralDAO.getPathUserDB());
         }
     }
-
-    //проверка на цифровые символы... можно её не использовать, так как id в fields[0] генерируется рандомом и содержит только цифровые символы
-
-    /*private static String gettingOnlyNumericCharacters(String[] arrayLine) {
-        String id = "";
-        for (Character ch : arrayLine[0].toCharArray()) {
-            if (ch != null && Character.isDigit(ch)) {
-                id += ch;
-            }
-        }
-        return id;
-    }*/
 }
