@@ -14,6 +14,8 @@ import static dz_lesson35_36.dao.UserDAO.findUserById;
 
 public class OrderDAO extends GeneralDAO{
 
+    private static String pathOrderDB = "C:\\Users\\Skorodielov\\Desktop\\OrderDB.txt";
+
     public static void bookRoom(long roomId, long userId, long hotelId)throws Exception{
         //проверить есть ли в файлах БД такие данные
         //если есть создать ордер и просетить ему данные по всем полям
@@ -70,7 +72,7 @@ public class OrderDAO extends GeneralDAO{
         if (!checkIdUserInOrderDB(userId))
             throw new BadRequestException("User with id " + userId + " is not exist");
 
-        writerInFailBD(GeneralDAO.getPathOrderDB(), resultForWriting(roomId, userId));
+        writerInFailBD(pathOrderDB, resultForWriting(roomId, userId));
     }
 
     private static boolean checkIdRoomInOrderDB(Long id)throws Exception{
@@ -101,9 +103,9 @@ public class OrderDAO extends GeneralDAO{
         LinkedList<Order> arrays = new LinkedList<>();
 
         int index = 0;
-        for (String el : readFromFile()){
+        for (String el : readFromFile(pathOrderDB)){
             if (el != null){
-                arrays.add(mapOrders(readFromFile().get(index)));
+                arrays.add(mapOrders(readFromFile(pathOrderDB).get(index)));
             }
             index++;
         }
@@ -143,7 +145,7 @@ public class OrderDAO extends GeneralDAO{
         if (order == null)
             throw new BadRequestException("Room does not exist");
 
-        try(BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(GeneralDAO.getPathOrderDB(), true))){
+        try(BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(pathOrderDB, true))){
             bufferedWriter.append(Long.toString(order.getId()) + (","));
             bufferedWriter.append(order.getUser().toString() + (","));
             bufferedWriter.append(order.getRoom().toString() + (","));
@@ -151,7 +153,7 @@ public class OrderDAO extends GeneralDAO{
             bufferedWriter.append(GeneralDAO.getFORMAT().format(order.getDateTo()) + (","));
             bufferedWriter.append(Double.toString(order.getMoneyPaid()) + ("\n"));
         }catch (IOException e){
-            throw new IOException("Can not write to file " + GeneralDAO.getPathOrderDB());
+            throw new IOException("Can not write to file " + pathOrderDB);
         }
     }
 

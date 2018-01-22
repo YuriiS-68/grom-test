@@ -11,6 +11,8 @@ import static dz_lesson35_36.dao.HotelDAO.findHotelById;
 
 public class RoomDAO extends GeneralDAO{
 
+    private static String pathRoomDB = "C:\\Users\\Skorodielov\\Desktop\\RoomDB.txt";
+
     public static Room addRoom(Room room)throws Exception{
         if (room == null)
             throw new BadRequestException("This " + room + " is not exist");
@@ -30,7 +32,7 @@ public class RoomDAO extends GeneralDAO{
         if (checkRoomById(idRoom))
             throw new BadRequestException("Room with id " + idRoom + " in file RoomDB not found.");
 
-        writerInFailBD(GeneralDAO.getPathRoomDB(), resultForWriting(idRoom));
+        writerInFailBD(pathRoomDB, resultForWriting(idRoom));
     }
 
     public static Collection findRooms(Filter filter)throws Exception{
@@ -76,9 +78,9 @@ public class RoomDAO extends GeneralDAO{
         LinkedList<Room> arrays = new LinkedList<>();
 
         int index = 0;
-        for (String el : readFromFile()){
+        for (String el : readFromFile(pathRoomDB)){
             if (el != null){
-                arrays.add(mapRooms(readFromFile().get(index)));
+                arrays.add(mapRooms(readFromFile(pathRoomDB).get(index)));
             }
             index++;
         }
@@ -149,7 +151,7 @@ public class RoomDAO extends GeneralDAO{
         if (room == null)
             throw new BadRequestException("Room does not exist");
 
-        try(BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(GeneralDAO.getPathRoomDB(), true))){
+        try(BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(pathRoomDB, true))){
             bufferedWriter.append(Long.toString(room.getId()) + (","));
             bufferedWriter.append(Integer.toString(room.getNumberOfGuests()) + (","));
             bufferedWriter.append(Double.toString(room.getPrice()) + (","));
@@ -158,7 +160,7 @@ public class RoomDAO extends GeneralDAO{
             bufferedWriter.append(GeneralDAO.getFORMAT().format(room.getDateAvailableFrom()) + (","));
             bufferedWriter.append(room.getHotel().toString() + ("\n"));
         }catch (IOException e){
-            throw new IOException("Can not write to file " + GeneralDAO.getPathRoomDB());
+            throw new IOException("Can not write to file " + pathRoomDB);
         }
     }
 

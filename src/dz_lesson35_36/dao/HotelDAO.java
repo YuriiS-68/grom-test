@@ -8,6 +8,7 @@ import java.util.LinkedList;
 
 public class HotelDAO extends GeneralDAO {
 
+    private static String pathHotelDB = "C:\\Users\\Skorodielov\\Desktop\\HotelDB.txt";
     public static Hotel addHotel(Hotel hotel)throws Exception{
         //проверить по id есть ли такой отель в файле
         //если нет, добавить в файл
@@ -33,7 +34,7 @@ public class HotelDAO extends GeneralDAO {
         if (checkHotelById(idHotel))
             throw new BadRequestException("Hotel with id " + idHotel + " does not exist");
 
-        writerInFailBD(GeneralDAO.getPathHotelDB(), resultForWriting(idHotel));
+        writerInFailBD(pathHotelDB, resultForWriting(idHotel));
     }
 
     public static LinkedList<Hotel> findHotelByName(String name)throws Exception{
@@ -84,9 +85,9 @@ public class HotelDAO extends GeneralDAO {
         LinkedList<Hotel> arrays = new LinkedList<>();
 
         int index = 0;
-        for (String el : readFromFile()){
+        for (String el : readFromFile(pathHotelDB)){
             if (el != null){
-                arrays.add(mapHotels(readFromFile().get(index)));
+                arrays.add(mapHotels(readFromFile(pathHotelDB).get(index)));
             }
             index++;
         }
@@ -164,14 +165,14 @@ public class HotelDAO extends GeneralDAO {
         if (hotel == null)
             throw new BadRequestException("Hotel does not exist");
 
-        try(BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(GeneralDAO.getPathHotelDB(), true))){
+        try(BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(pathHotelDB, true))){
             bufferedWriter.append(Long.toString(hotel.getId()) + (","));
             bufferedWriter.append(hotel.getCountry() + (","));
             bufferedWriter.append(hotel.getCity() + (","));
             bufferedWriter.append(hotel.getStreet() + (","));
             bufferedWriter.append(hotel.getName() + ("\n"));
         }catch (IOException e){
-            throw new IOException("Can not write to file " + GeneralDAO.getPathHotelDB());
+            throw new IOException("Can not write to file " + pathHotelDB);
         }
     }
 }

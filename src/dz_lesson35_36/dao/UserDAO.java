@@ -9,6 +9,7 @@ import java.util.LinkedList;
 
 public class UserDAO extends GeneralDAO {
 
+    private static String pathUserDB = "C:\\Users\\Skorodielov\\Desktop\\UserDB.txt";
     //считывание данных - считывание файла
     //обработка данных - маппинг данных
 
@@ -20,7 +21,7 @@ public class UserDAO extends GeneralDAO {
         if (user == null)
             throw new BadRequestException("Invalid incoming data");
 
-        if (checkValidLoginName(GeneralDAO.getPathUserDB(), user.getUserName()))
+        if (checkValidLoginName(user.getUserName()))
             throw new BadRequestException("User with name " + user.getUserName() + " already exists");
 
         assignmentObjectId(user);
@@ -67,8 +68,8 @@ public class UserDAO extends GeneralDAO {
         return false;
     }
 
-    private static boolean checkValidLoginName(String path, String loginName)throws Exception{
-        if (path == null || loginName == null)
+    private static boolean checkValidLoginName(String loginName)throws Exception{
+        if (loginName == null)
             throw new BadRequestException("Invalid incoming data");
 
         for (User el : gettingListObjects()) {
@@ -83,9 +84,9 @@ public class UserDAO extends GeneralDAO {
         LinkedList<User> arrays = new LinkedList<>();
 
         int index = 0;
-        for (String el : readFromFile()){
+        for (String el : readFromFile(pathUserDB)){
             if (el != null){
-                arrays.add(mapUsers(readFromFile().get(index)));
+                arrays.add(mapUsers(readFromFile(pathUserDB).get(index)));
             }
             index++;
         }
@@ -115,14 +116,14 @@ public class UserDAO extends GeneralDAO {
         if (user == null)
             throw new BadRequestException("User does not exist");
 
-        try(BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(GeneralDAO.getPathUserDB(), true))){
+        try(BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(pathUserDB, true))){
             bufferedWriter.append(Long.toString(user.getId()) + (","));
             bufferedWriter.append(user.getUserName() + (","));
             bufferedWriter.append(user.getPassword() + (","));
             bufferedWriter.append(user.getCountry() + (","));
             bufferedWriter.append(user.getUserType().toString() + ("\n"));
         }catch (IOException e){
-            throw new IOException("Can not write to file " + GeneralDAO.getPathUserDB());
+            throw new IOException("Can not write to file " + pathUserDB);
         }
     }
 }
