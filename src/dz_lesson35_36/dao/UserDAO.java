@@ -18,7 +18,7 @@ public class UserDAO extends GeneralDAO {
         //присвоить тип пользователя, пароль и страну
         //save user to DB (file)
         if (user == null)
-            throw new BadRequestException("User does not exist");
+            throw new BadRequestException("Invalid incoming data");
 
         if (checkValidLoginName(GeneralDAO.getPathUserDB(), user.getUserName()))
             throw new BadRequestException("User with name " + user.getUserName() + " already exists");
@@ -43,11 +43,35 @@ public class UserDAO extends GeneralDAO {
         }
     }*/
 
+    public static User findUserById(Long id)throws Exception{
+        if (id == null)
+            throw new BadRequestException("This does  " + id + " not exist ");
+
+        for (User user : gettingListObjects()){
+            if (user != null && user.getId() == id){
+                return user;
+            }
+        }
+        throw new BadRequestException("User with " + id + " no such found.");
+    }
+
+    public static boolean checkIdUser(Long id)throws Exception{
+        if (id == 0 )
+            throw new BadRequestException("Invalid incoming data");
+
+        for (User user : gettingListObjects()){
+            if (user != null && user.getId() == id){
+                return true;
+            }
+        }
+        return false;
+    }
+
     private static boolean checkValidLoginName(String path, String loginName)throws Exception{
         if (path == null || loginName == null)
             throw new BadRequestException("Invalid incoming data");
 
-        for (User el : gettingListObjectsFromFileUserDB()) {
+        for (User el : gettingListObjects()) {
             if (el != null && el.getUserName().equals(loginName)){
                 return true;
             }
@@ -55,13 +79,13 @@ public class UserDAO extends GeneralDAO {
         return false;
     }
 
-    public static LinkedList<User> gettingListObjectsFromFileUserDB()throws Exception{
+    public static LinkedList<User> gettingListObjects()throws Exception{
         LinkedList<User> arrays = new LinkedList<>();
 
         int index = 0;
-        for (String el : readFromFile(GeneralDAO.getPathUserDB())){
+        for (String el : readFromFile()){
             if (el != null){
-                arrays.add(mapUsers(readFromFile(GeneralDAO.getPathUserDB()).get(index)));
+                arrays.add(mapUsers(readFromFile().get(index)));
             }
             index++;
         }

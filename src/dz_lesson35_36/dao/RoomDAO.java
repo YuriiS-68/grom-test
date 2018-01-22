@@ -2,21 +2,20 @@ package dz_lesson35_36.dao;
 
 import dz_lesson35_36.exception.BadRequestException;
 import dz_lesson35_36.model.Filter;
-import dz_lesson35_36.model.Hotel;
 import dz_lesson35_36.model.Room;
 
 import java.io.*;
 import java.util.*;
 
-public class RoomDAO extends GeneralDAO{
+import static dz_lesson35_36.dao.HotelDAO.findHotelById;
 
-    private static HotelDAO hotelDAO = new HotelDAO();
+public class RoomDAO extends GeneralDAO{
 
     public static Room addRoom(Room room)throws Exception{
         if (room == null)
             throw new BadRequestException("This " + room + " is not exist");
 
-        if (!checkObjectById(room.getId()))
+        if (!checkRoomById(room.getId()))
             throw new BadRequestException("Room with id " + room.getId() + " in file RoomDB already exists.");
 
         writerToFile(room);
@@ -28,7 +27,7 @@ public class RoomDAO extends GeneralDAO{
         if (idRoom == null)
             throw new BadRequestException("This id " + idRoom + " is not exist.");
 
-        if (checkObjectById(idRoom))
+        if (checkRoomById(idRoom))
             throw new BadRequestException("Room with id " + idRoom + " in file RoomDB not found.");
 
         writerInFailBD(GeneralDAO.getPathRoomDB(), resultForWriting(idRoom));
@@ -40,7 +39,7 @@ public class RoomDAO extends GeneralDAO{
 
         LinkedList<Room> foundRooms = new LinkedList<>();
 
-        for (Room room : gettingListObjectsFromFileRoomDB()){
+        for (Room room : gettingListObjects()){
             if (filterCheck(room, filter)){
                 foundRooms.add(room);
             }
@@ -73,17 +72,41 @@ public class RoomDAO extends GeneralDAO{
         return true;
     }
 
-    public static LinkedList<Room> gettingListObjectsFromFileRoomDB()throws Exception{
+    public static LinkedList<Room> gettingListObjects()throws Exception{
         LinkedList<Room> arrays = new LinkedList<>();
 
         int index = 0;
-        for (String el : readFromFile(GeneralDAO.getPathRoomDB())){
+        for (String el : readFromFile()){
             if (el != null){
-                arrays.add(mapRooms(readFromFile(GeneralDAO.getPathRoomDB()).get(index)));
+                arrays.add(mapRooms(readFromFile().get(index)));
             }
             index++;
         }
         return arrays;
+    }
+
+    public static Room findRoomById(Long id)throws Exception{
+        if (id == null)
+            throw new BadRequestException("This does  " + id + " not exist ");
+
+        for (Room room : gettingListObjects()){
+            if (room != null && room.getId() == id){
+                return room;
+            }
+        }
+        throw new BadRequestException("Room with " + id + " no such found.");
+    }
+
+    public static boolean checkIdRoom(Long id)throws Exception{
+        if (id == 0 )
+            throw new BadRequestException("Invalid incoming data");
+
+        for (Room room : gettingListObjects()){
+            if (room != null && room.getId() == id){
+                return true;
+            }
+        }
+        return false;
     }
 
     private static Room mapRooms(String string)throws Exception{
@@ -110,23 +133,11 @@ public class RoomDAO extends GeneralDAO{
         return room;
     }
 
-    private static Hotel findHotelById(Long id)throws Exception{
-        if (id == null)
-            throw new BadRequestException("This does  " + id + " not exist ");
-
-        for (Hotel hotel : hotelDAO.gettingListObjectsFromFileHotelDB()){
-            if (hotel != null && hotel.getId() == id){
-                return hotel;
-            }
-        }
-        throw new BadRequestException("Hotel with " + id + " no such found.");
-    }
-
-    private static boolean checkObjectById(Long id)throws Exception{
+    private static boolean checkRoomById(Long id)throws Exception{
         if (id == null)
             throw new BadRequestException("Invalid incoming data");
 
-        for (Room el : gettingListObjectsFromFileRoomDB()){
+        for (Room el : gettingListObjects()){
             if (el != null && el.getId() == id){
                 return false;
             }
@@ -154,7 +165,7 @@ public class RoomDAO extends GeneralDAO{
     private static StringBuffer resultForWriting(Long idRoom)throws Exception{
         StringBuffer res = new StringBuffer();
 
-        for (Room el : gettingListObjectsFromFileRoomDB()){
+        for (Room el : gettingListObjects()){
             if (el != null && el.getId() != idRoom){
                 res.append(Long.toString(el.getId()) + (","));
                 res.append(Integer.toString(el.getNumberOfGuests()) + (","));

@@ -10,22 +10,22 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Random;
 
-public abstract class GeneralDAO <T>{
+public abstract class GeneralDAO {
 
     private static String pathUserDB = "C:\\Users\\Skorodielov\\Desktop\\UserDB.txt";
     private static String pathHotelDB = "C:\\Users\\Skorodielov\\Desktop\\HotelDB.txt";
     private static String pathRoomDB = "C:\\Users\\Skorodielov\\Desktop\\RoomDB.txt";
     private static String pathOrderDB = "C:\\Users\\Skorodielov\\Desktop\\OrderDB.txt";
-    private static String pathToDB;
+    private static String pathToDB = "";
     private static final DateFormat FORMAT = new SimpleDateFormat("dd.MM.yyyy");
 
-    public static ArrayList<String> readFromFile(String path)throws Exception{
-        if(path == null)
+    public static ArrayList<String> readFromFile()throws Exception{
+        /*if(path == null)
             throw new BadRequestException("This path " + path + " does not exists");
-
+*/
         ArrayList<String> arrayList = new ArrayList<>();
 
-        try (BufferedReader br = new BufferedReader(new FileReader(path))){
+        try (BufferedReader br = new BufferedReader(new FileReader(getPathToDB()))){
             String line;
 
             while ((line = br.readLine()) != null){
@@ -39,7 +39,7 @@ public abstract class GeneralDAO <T>{
         }catch (FileNotFoundException e){
             throw new FileNotFoundException("File does not exist");
         } catch (IOException e) {
-            throw new IOException("Reading from file " + path + " failed");
+            throw new IOException("Reading from file " + getPathToDB() + " failed");
         }
         return arrayList;
     }
@@ -52,7 +52,7 @@ public abstract class GeneralDAO <T>{
         }
     }
 
-    private LinkedList<T> getObjectsFromDB()throws Exception{
+    /*private LinkedList<T> getObjectsFromDB()throws Exception{
         LinkedList<T> arrays = new LinkedList<>();
 
         int index = 0;
@@ -63,7 +63,7 @@ public abstract class GeneralDAO <T>{
             index++;
         }
         return arrays;
-    }
+    }*/
 
     /*private T mapObjects(String string)throws Exception{
         if (string == null)

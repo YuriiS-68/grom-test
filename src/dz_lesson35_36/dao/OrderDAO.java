@@ -6,11 +6,13 @@ import dz_lesson35_36.model.*;
 import java.io.*;
 import java.util.*;
 
-public class OrderDAO extends GeneralDAO{
+import static dz_lesson35_36.dao.HotelDAO.checkIdHotel;
+import static dz_lesson35_36.dao.RoomDAO.checkIdRoom;
+import static dz_lesson35_36.dao.RoomDAO.findRoomById;
+import static dz_lesson35_36.dao.UserDAO.checkIdUser;
+import static dz_lesson35_36.dao.UserDAO.findUserById;
 
-    private static UserDAO userDAO = new UserDAO();
-    private static HotelDAO hotelDAO = new HotelDAO();
-    private static RoomDAO roomDAO = new RoomDAO();
+public class OrderDAO extends GeneralDAO{
 
     public static void bookRoom(long roomId, long userId, long hotelId)throws Exception{
         //проверить есть ли в файлах БД такие данные
@@ -75,7 +77,7 @@ public class OrderDAO extends GeneralDAO{
         if (id == 0 )
             throw new BadRequestException("Invalid incoming data");
 
-        for (Order el : gettingListObjectsFromFileOrderDB()){
+        for (Order el : gettingListObjects()){
             if (el != null && el.getRoom().getId() == id){
                 return true;
             }
@@ -87,7 +89,7 @@ public class OrderDAO extends GeneralDAO{
         if (id == 0 )
             throw new BadRequestException("Invalid incoming data");
 
-        for (Order el : gettingListObjectsFromFileOrderDB()){
+        for (Order el : gettingListObjects()){
             if (el != null && el.getUser().getId() == id){
                 return true;
             }
@@ -95,13 +97,13 @@ public class OrderDAO extends GeneralDAO{
         return false;
     }
 
-    private static LinkedList<Order> gettingListObjectsFromFileOrderDB()throws Exception{
+    private static LinkedList<Order> gettingListObjects()throws Exception{
         LinkedList<Order> arrays = new LinkedList<>();
 
         int index = 0;
-        for (String el : readFromFile(GeneralDAO.getPathOrderDB())){
+        for (String el : readFromFile()){
             if (el != null){
-                arrays.add(mapOrders(readFromFile(GeneralDAO.getPathOrderDB()).get(index)));
+                arrays.add(mapOrders(readFromFile().get(index)));
             }
             index++;
         }
@@ -137,66 +139,6 @@ public class OrderDAO extends GeneralDAO{
         return order;
     }
 
-    private static User findUserById(Long id)throws Exception{
-        if (id == null)
-            throw new BadRequestException("This does  " + id + " not exist ");
-
-        for (User user : userDAO.gettingListObjectsFromFileUserDB()){
-            if (user != null && user.getId() == id){
-                return user;
-            }
-        }
-        throw new BadRequestException("User with " + id + " no such found.");
-    }
-
-    private static Room findRoomById(Long id)throws Exception{
-        if (id == null)
-            throw new BadRequestException("This does  " + id + " not exist ");
-
-        for (Room room : roomDAO.gettingListObjectsFromFileRoomDB()){
-            if (room != null && room.getId() == id){
-                return room;
-            }
-        }
-        throw new BadRequestException("Room with " + id + " no such found.");
-    }
-
-    private static boolean checkIdRoom(Long id)throws Exception{
-        if (id == 0 )
-            throw new BadRequestException("Invalid incoming data");
-
-        for (Room room : roomDAO.gettingListObjectsFromFileRoomDB()){
-            if (room != null && room.getId() == id){
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private static boolean checkIdUser(Long id)throws Exception{
-        if (id == 0 )
-            throw new BadRequestException("Invalid incoming data");
-
-        for (User user : userDAO.gettingListObjectsFromFileUserDB()){
-            if (user != null && user.getId() == id){
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private static boolean checkIdHotel(Long id)throws Exception{
-        if (id == 0 )
-            throw new BadRequestException("Invalid incoming data");
-
-        for (Hotel hotel : hotelDAO.gettingListObjectsFromFileHotelDB()){
-            if (hotel != null && hotel.getId() == id){
-                return true;
-            }
-        }
-        return false;
-    }
-
     private static void writerToFile(Order order)throws Exception{
         if (order == null)
             throw new BadRequestException("Room does not exist");
@@ -217,7 +159,7 @@ public class OrderDAO extends GeneralDAO{
         StringBuffer res = new StringBuffer();
 
         int index = 0;
-        for (Order el : gettingListObjectsFromFileOrderDB()){
+        for (Order el : gettingListObjects()){
             if (el != null && el.getUser().getId() == userId && el.getRoom().getId() == roomId) {
                 el = null;
             }else {
