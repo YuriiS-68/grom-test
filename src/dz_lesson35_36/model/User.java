@@ -68,12 +68,10 @@ public class User extends IdEntity{
 
     @Override
     public String toString() {
-        return "User{" +
-                "id=" + id +
-                ", userName='" + userName + '\'' +
-                ", password='" + password + '\'' +
-                ", country='" + country + '\'' +
-                ", userType=" + userType +
-                '}';
+        return  id + ","
+                 + userName + ","
+                 + password + ","
+                 + country + ","
+                 + userType;
     }
 }

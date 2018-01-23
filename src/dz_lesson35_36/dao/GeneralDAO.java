@@ -11,12 +11,15 @@ import java.util.Random;
 
 public abstract class GeneralDAO {
 
+    private static String pathDB = "";
+
     private static final DateFormat FORMAT = new SimpleDateFormat("dd.MM.yyyy");
 
-    public static ArrayList<String> readFromFile(String path)throws Exception{
+    static ArrayList<String> readFromFile()throws Exception{
         ArrayList<String> arrayList = new ArrayList<>();
 
-        try (BufferedReader br = new BufferedReader(new FileReader(path))){
+
+        try (BufferedReader br = new BufferedReader(new FileReader(pathDB))){
             String line;
 
             while ((line = br.readLine()) != null){
@@ -30,12 +33,12 @@ public abstract class GeneralDAO {
         }catch (FileNotFoundException e){
             throw new FileNotFoundException("File does not exist");
         } catch (IOException e) {
-            throw new IOException("Reading from file " + path + " failed");
+            throw new IOException("Reading from file " + pathDB + " failed");
         }
         return arrayList;
     }
 
-    public static void writerInFailBD(String path, StringBuffer content)throws Exception{
+    static void writerInFailBD(String path, StringBuffer content)throws Exception{
         try(BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(path))){
             bufferedWriter.append(content);
         }catch (IOException e){
@@ -43,7 +46,19 @@ public abstract class GeneralDAO {
         }
     }
 
-    public  static <T extends IdEntity> void assignmentObjectId(T t)throws Exception{
+    /*<T extends IdEntity> findObjectById(T t)throws Exception{
+        if (id == null)
+            throw new BadRequestException("This does  " + id + " not exist ");
+
+        for (T el : gettingListObjects()){
+            if (user != null && user.getId() == id){
+                return t;
+            }
+        }
+        throw new BadRequestException("User with " + id + " no such found.");
+    }*/
+
+    static <T extends IdEntity> void assignmentObjectId(T t)throws Exception{
         if (t == null)
             throw new BadRequestException("User does not exist");
 
@@ -52,6 +67,10 @@ public abstract class GeneralDAO {
         if (t.getId() < 0){
             t.setId(-1 * t.getId());
         }
+    }
+
+    public static void setPathDB(String pathDB) {
+        GeneralDAO.pathDB = pathDB;
     }
 
     public static DateFormat getFORMAT() {

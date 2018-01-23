@@ -6,13 +6,11 @@ import dz_lesson35_36.model.*;
 import java.io.*;
 import java.util.*;
 
-import static dz_lesson35_36.dao.HotelDAO.checkIdHotel;
-import static dz_lesson35_36.dao.RoomDAO.checkIdRoom;
-import static dz_lesson35_36.dao.RoomDAO.findRoomById;
-import static dz_lesson35_36.dao.UserDAO.checkIdUser;
-import static dz_lesson35_36.dao.UserDAO.findUserById;
-
 public class OrderDAO extends GeneralDAO{
+
+    private static UserDAO userDAO = new UserDAO();
+    private static HotelDAO hotelDAO = new HotelDAO();
+    private static RoomDAO roomDAO = new RoomDAO();
 
     private static String pathOrderDB = "C:\\Users\\Skorodielov\\Desktop\\OrderDB.txt";
 
@@ -23,19 +21,32 @@ public class OrderDAO extends GeneralDAO{
         if (roomId == 0 || userId == 0 || hotelId == 0)
             throw new BadRequestException("Invalid incoming data");
 
-        if(!checkIdRoom(roomId))
+        if(!roomDAO.checkIdRoom(roomId))
             throw new BadRequestException("Room with id " + roomId + " is not exist");
 
-        if (!checkIdUser(userId))
+        if (!userDAO.checkIdUser(userId))
             throw new BadRequestException("User with id " + userId + " is not exist");
 
-        if (!checkIdHotel(hotelId))
+        if (!hotelDAO.checkIdHotel(hotelId))
             throw new BadRequestException("Hotel with id " + hotelId + " is not exist");
 
-        writerToFile(mapOrder(roomId, userId));
+        writerToFile(createOrder(roomId, userId));
     }
 
-    private static Order mapOrder(long roomId, long userId)throws Exception{
+    public static void cancelReservation(long roomId, long userId)throws Exception{
+        if (roomId == 0 || userId == 0)
+            throw new BadRequestException("Invalid incoming data");
+
+        if(!checkId(roomId, userId))
+            throw new BadRequestException("Room with id " + roomId + " is not exist");
+
+        if (!checkId(roomId, userId))
+            throw new BadRequestException("User with id " + userId + " is not exist");
+
+        writerInFailBD(pathOrderDB, resultForWriting(roomId, userId));
+    }
+
+    private static Order createOrder(long roomId, long userId)throws Exception{
         Order order = new Order();
 
         assignmentObjectId(order);
@@ -45,14 +56,14 @@ public class OrderDAO extends GeneralDAO{
         Date dateStart = GeneralDAO.getFORMAT().parse(dateFrom);
         Date dateFinish = GeneralDAO.getFORMAT().parse(dateTo);
 
-        order.setUser(findUserById(userId));
-        order.setRoom(findRoomById(roomId));
+        order.setUser(userDAO.findUserById(userId));
+        order.setRoom(roomDAO.findRoomById(roomId));
         order.setDateFrom(GeneralDAO.getFORMAT().parse(dateFrom));
         order.setDateTo(GeneralDAO.getFORMAT().parse(dateTo));
 
         long difference = dateStart.getTime() - dateFinish.getTime();
         int days = (int)(difference / (24 * 60 * 60 * 1000));
-        double orderCost = findRoomById(roomId).getPrice() * days;
+        double orderCost = roomDAO.findRoomById(roomId).getPrice() * days;
         if (orderCost < 0){
             orderCost = -1 * orderCost;
         }
@@ -62,50 +73,27 @@ public class OrderDAO extends GeneralDAO{
         return order;
     }
 
-    public static void cancelReservation(long roomId, long userId)throws Exception{
-        if (roomId == 0 || userId == 0)
+    private static boolean checkId(long idRoom, long idUser)throws Exception{
+        if (idRoom == 0 || idUser == 0)
             throw new BadRequestException("Invalid incoming data");
 
-        if(!checkIdRoomInOrderDB(roomId))
-            throw new BadRequestException("Room with id " + roomId + " is not exist");
-
-        if (!checkIdUserInOrderDB(userId))
-            throw new BadRequestException("User with id " + userId + " is not exist");
-
-        writerInFailBD(pathOrderDB, resultForWriting(roomId, userId));
-    }
-
-    private static boolean checkIdRoomInOrderDB(Long id)throws Exception{
-        if (id == 0 )
-            throw new BadRequestException("Invalid incoming data");
-
-        for (Order el : gettingListObjects()){
-            if (el != null && el.getRoom().getId() == id){
+        for (Order el : getOrders()){
+            if (el != null && el.getRoom().getId() == idRoom || el != null && el.getUser().getId() == idUser){
                 return true;
             }
         }
         return false;
     }
 
-    private static boolean checkIdUserInOrderDB(Long id)throws Exception{
-        if (id == 0 )
-            throw new BadRequestException("Invalid incoming data");
-
-        for (Order el : gettingListObjects()){
-            if (el != null && el.getUser().getId() == id){
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private static LinkedList<Order> gettingListObjects()throws Exception{
+    private static LinkedList<Order> getOrders()throws Exception{
         LinkedList<Order> arrays = new LinkedList<>();
 
+        setPathDB(pathOrderDB);
+
         int index = 0;
-        for (String el : readFromFile(pathOrderDB)){
+        for (String el : readFromFile()){
             if (el != null){
-                arrays.add(mapOrders(readFromFile(pathOrderDB).get(index)));
+                arrays.add(mapOrders(readFromFile().get(index)));
             }
             index++;
         }
@@ -126,14 +114,14 @@ public class OrderDAO extends GeneralDAO{
                 idUser += ch;
             }
         }
-        order.setUser(findUserById(Long.parseLong(idUser)));
+        order.setUser(userDAO.findUserById(Long.parseLong(idUser)));
         String idRoom = "";
         for (Character ch : fields[6].toCharArray()) {
             if (ch != null && Character.isDigit(ch)) {
                 idRoom += ch;
             }
         }
-        order.setRoom(findRoomById(Long.parseLong(idRoom)));
+        order.setRoom(roomDAO.findRoomById(Long.parseLong(idRoom)));
         order.setDateFrom(GeneralDAO.getFORMAT().parse(fields[17]));
         order.setDateTo(GeneralDAO.getFORMAT().parse(fields[18]));
         order.setMoneyPaid(Double.parseDouble(fields[19]));
@@ -161,7 +149,7 @@ public class OrderDAO extends GeneralDAO{
         StringBuffer res = new StringBuffer();
 
         int index = 0;
-        for (Order el : gettingListObjects()){
+        for (Order el : getOrders()){
             if (el != null && el.getUser().getId() == userId && el.getRoom().getId() == roomId) {
                 el = null;
             }else {

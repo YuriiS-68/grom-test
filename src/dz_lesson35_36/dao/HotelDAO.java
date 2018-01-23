@@ -1,5 +1,6 @@
 package dz_lesson35_36.dao;
 
+import com.sun.xml.internal.stream.writers.WriterUtility;
 import dz_lesson35_36.exception.BadRequestException;
 import dz_lesson35_36.model.Hotel;
 
@@ -9,6 +10,7 @@ import java.util.LinkedList;
 public class HotelDAO extends GeneralDAO {
 
     private static String pathHotelDB = "C:\\Users\\Skorodielov\\Desktop\\HotelDB.txt";
+
     public static Hotel addHotel(Hotel hotel)throws Exception{
         //проверить по id есть ли такой отель в файле
         //если нет, добавить в файл
@@ -34,7 +36,7 @@ public class HotelDAO extends GeneralDAO {
         if (checkHotelById(idHotel))
             throw new BadRequestException("Hotel with id " + idHotel + " does not exist");
 
-        writerInFailBD(pathHotelDB, resultForWriting(idHotel));
+        writerInFailBD(pathHotelDB, contentForWriting(idHotel));
     }
 
     public static LinkedList<Hotel> findHotelByName(String name)throws Exception{
@@ -47,7 +49,7 @@ public class HotelDAO extends GeneralDAO {
 
         LinkedList<Hotel> hotels = new LinkedList<>();
 
-        for (Hotel el : gettingListObjects()){
+        for (Hotel el : getHotels()){
             if (el != null && el.getName().equals(name)){
                 hotels.add(el);
             }
@@ -69,7 +71,7 @@ public class HotelDAO extends GeneralDAO {
 
         LinkedList<Hotel> hotels = new LinkedList<>();
 
-        for (Hotel el : gettingListObjects()){
+        for (Hotel el : getHotels()){
             if (el != null && el.getCity().equals(city)){
                 hotels.add(el);
             }
@@ -81,24 +83,11 @@ public class HotelDAO extends GeneralDAO {
         return hotels;
     }
 
-    public static LinkedList<Hotel> gettingListObjects()throws Exception{
-        LinkedList<Hotel> arrays = new LinkedList<>();
-
-        int index = 0;
-        for (String el : readFromFile(pathHotelDB)){
-            if (el != null){
-                arrays.add(mapHotels(readFromFile(pathHotelDB).get(index)));
-            }
-            index++;
-        }
-        return arrays;
-    }
-
     public static Hotel findHotelById(Long id)throws Exception{
         if (id == null)
             throw new BadRequestException("This does  " + id + " not exist ");
 
-        for (Hotel hotel : gettingListObjects()){
+        for (Hotel hotel : getHotels()){
             if (hotel != null && hotel.getId() == id){
                 return hotel;
             }
@@ -110,12 +99,27 @@ public class HotelDAO extends GeneralDAO {
         if (id == 0 )
             throw new BadRequestException("Invalid incoming data");
 
-        for (Hotel hotel : gettingListObjects()){
+        for (Hotel hotel : getHotels()){
             if (hotel != null && hotel.getId() == id){
                 return true;
             }
         }
         return false;
+    }
+
+    private static LinkedList<Hotel> getHotels()throws Exception{
+        LinkedList<Hotel> arrays = new LinkedList<>();
+
+        setPathDB(pathHotelDB);
+
+        int index = 0;
+        for (String el : readFromFile()){
+            if (el != null){
+                arrays.add(mapHotels(readFromFile().get(index)));
+            }
+            index++;
+        }
+        return arrays;
     }
 
     private static Hotel mapHotels(String string)throws Exception{
@@ -138,7 +142,7 @@ public class HotelDAO extends GeneralDAO {
         if (id == null)
             throw new BadRequestException("Invalid incoming data");
 
-        for (Hotel el : gettingListObjects()) {
+        for (Hotel el : getHotels()) {
             if (el != null && el.getId() == id){
                 return false;
             }
@@ -146,16 +150,13 @@ public class HotelDAO extends GeneralDAO {
         return true;
     }
 
-    private static StringBuffer resultForWriting(Long idHotel)throws Exception{
+    private static StringBuffer contentForWriting(Long idHotel)throws Exception{
         StringBuffer res = new StringBuffer();
 
-        for (Hotel el : gettingListObjects()){
+        for (Hotel el : getHotels()){
             if (el != null && el.getId() != idHotel){
-                res.append(Long.toString(el.getId()) + (","));
-                res.append(el.getCountry() + (","));
-                res.append(el.getCity() + (","));
-                res.append(el.getStreet() + (","));
-                res.append(el.getName() + ("\n"));
+                res.append(el.toString() + ("\n"));
+
             }
         }
         return res;
@@ -165,12 +166,9 @@ public class HotelDAO extends GeneralDAO {
         if (hotel == null)
             throw new BadRequestException("Hotel does not exist");
 
+        //setPathDB(pathHotelDB);
         try(BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(pathHotelDB, true))){
-            bufferedWriter.append(Long.toString(hotel.getId()) + (","));
-            bufferedWriter.append(hotel.getCountry() + (","));
-            bufferedWriter.append(hotel.getCity() + (","));
-            bufferedWriter.append(hotel.getStreet() + (","));
-            bufferedWriter.append(hotel.getName() + ("\n"));
+            bufferedWriter.append(hotel.toString() + "\n");
         }catch (IOException e){
             throw new IOException("Can not write to file " + pathHotelDB);
         }

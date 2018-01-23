@@ -16,7 +16,7 @@ public class DemoUser {
         User user7 = new User("Alex", "7777", "USA", UserType.ADMIN);
         User user8 = new User("Oleg", "8888", "Russia", UserType.USER);
 
-        UserDAO.registerUser(user8);
+        UserDAO.registerUser(user5);
         /*UserDAO.registerUser(user2);
         UserDAO.registerUser(user3);
         UserDAO.registerUser(user4);

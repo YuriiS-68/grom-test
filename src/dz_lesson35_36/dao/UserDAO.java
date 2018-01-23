@@ -48,7 +48,7 @@ public class UserDAO extends GeneralDAO {
         if (id == null)
             throw new BadRequestException("This does  " + id + " not exist ");
 
-        for (User user : gettingListObjects()){
+        for (User user : getUsers()){
             if (user != null && user.getId() == id){
                 return user;
             }
@@ -60,7 +60,7 @@ public class UserDAO extends GeneralDAO {
         if (id == 0 )
             throw new BadRequestException("Invalid incoming data");
 
-        for (User user : gettingListObjects()){
+        for (User user : getUsers()){
             if (user != null && user.getId() == id){
                 return true;
             }
@@ -68,29 +68,31 @@ public class UserDAO extends GeneralDAO {
         return false;
     }
 
+    private static LinkedList<User> getUsers()throws Exception{
+        LinkedList<User> arrays = new LinkedList<>();
+
+        setPathDB(pathUserDB);
+
+        int index = 0;
+        for (String el : readFromFile()){
+            if (el != null){
+                arrays.add(mapUsers(readFromFile().get(index)));
+            }
+            index++;
+        }
+        return arrays;
+    }
+
     private static boolean checkValidLoginName(String loginName)throws Exception{
         if (loginName == null)
             throw new BadRequestException("Invalid incoming data");
 
-        for (User el : gettingListObjects()) {
+        for (User el : getUsers()) {
             if (el != null && el.getUserName().equals(loginName)){
                 return true;
             }
         }
         return false;
-    }
-
-    public static LinkedList<User> gettingListObjects()throws Exception{
-        LinkedList<User> arrays = new LinkedList<>();
-
-        int index = 0;
-        for (String el : readFromFile(pathUserDB)){
-            if (el != null){
-                arrays.add(mapUsers(readFromFile(pathUserDB).get(index)));
-            }
-            index++;
-        }
-        return arrays;
     }
 
     private static User mapUsers(String string)throws Exception{
@@ -117,11 +119,7 @@ public class UserDAO extends GeneralDAO {
             throw new BadRequestException("User does not exist");
 
         try(BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(pathUserDB, true))){
-            bufferedWriter.append(Long.toString(user.getId()) + (","));
-            bufferedWriter.append(user.getUserName() + (","));
-            bufferedWriter.append(user.getPassword() + (","));
-            bufferedWriter.append(user.getCountry() + (","));
-            bufferedWriter.append(user.getUserType().toString() + ("\n"));
+            bufferedWriter.append(user.toString() + ("\n"));
         }catch (IOException e){
             throw new IOException("Can not write to file " + pathUserDB);
         }

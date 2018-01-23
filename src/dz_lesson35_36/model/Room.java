@@ -7,7 +7,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Objects;
 
-public class Room {
+public class Room extends IdEntity{
 
     private static final DateFormat FORMAT = new SimpleDateFormat("dd.MM.yyyy");
 
@@ -107,7 +107,7 @@ public class Room {
         this.hotel = hotel;
     }
 
-    @Override
+    /*@Override
     public String toString() {
         String date = FORMAT.format(dateAvailableFrom);
         return "Room{" +
@@ -116,8 +116,21 @@ public class Room {
                 ", price=" + price +
                 ", breakfastIncluded=" + breakfastIncluded +
                 ", petsAllowed=" + petsAllowed +
-                ", dateAvailableFrom=" + date +
+                ", dateAvailableFrom=" + dateAvailableFrom +
                 ", hotel=" + hotel +
                 '}';
+    }*/
+
+
+    @Override
+    public String toString() {
+        String date = FORMAT.format(dateAvailableFrom);
+        return id + ","
+                + numberOfGuests + ","
+                + price + ","
+                + breakfastIncluded + ","
+                + petsAllowed + ","
+                + date + ","
+                + hotel.getId();
     }
 }

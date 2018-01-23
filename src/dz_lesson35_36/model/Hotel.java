@@ -2,7 +2,7 @@ package dz_lesson35_36.model;
 
 import java.util.Objects;
 
-public class Hotel {
+public class Hotel extends IdEntity{
     private long id;
     private String country;
     private String city;
@@ -80,12 +80,10 @@ public class Hotel {
 
     @Override
     public String toString() {
-        return "Hotel{" +
-                "id=" + id +
-                ", country='" + country + '\'' +
-                ", city='" + city + '\'' +
-                ", street='" + street + '\'' +
-                ", name='" + name + '\'' +
-                '}';
+        return id + ","
+                + country + ","
+                + city + ","
+                + street + ","
+                + name;
     }
 }

@@ -93,13 +93,11 @@ public class Order extends IdEntity{
 
     @Override
     public String toString() {
-        return "Order{" +
-                "id=" + id +
-                ", user=" + user +
-                ", room=" + room +
-                ", dateFrom=" + dateFrom +
-                ", dateTo=" + dateTo +
-                ", moneyPaid=" + moneyPaid +
-                '}';
+        return id + ","
+                + user + ","
+                + room + ","
+                + dateFrom + ","
+                + dateTo + ","
+                + moneyPaid;
     }
 }
